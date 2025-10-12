@@ -1,25 +1,61 @@
 ---
 # Nome do arquivo PDF gerado na pasta resultado
-output-file: "Entrega 1 - Gustavo"
+output-file: "Entrega 1 - Breno"
 ---
 
 ```{r setup}
 #| include: false
-source("rdocs/entrega_1.R")
+source("rdocs/source/packages.R")
+library(ggplot2)
+library(dplyr)
+library(readxl)
 ```
 
 # Análises
-
-## Análise tal
-
-Introdução da análise
-
+## Receita média das lojas registrada nos anos de 1880 até 1889
+Nessa análise, será observada, por ano, a média do faturamento bruto anual de cada uma das lojas descritas no plano amostral, no período de 1880 a 1889, com o objetivo de compreender se houve aumento ou diminuição da receita média ao longo desses anos. Serão analisadas duas variáveis: o ano das vendas, uma variável quantitativa discreta, e a receita média das lojas, que é uma variável quantitativa contínua, expressa em reais. Os valores consideram a cotação atual do dólar a R$ 5,31 para referência.
 ```{r}
-#| label: fig-g1
-#| fig-cap: "Gráfico de barras teste "
-g1
+dadosGerais <- read_excel("C:/Users/Breno/Downloads/relatorio_old_town_road (2).xlsx")
+
+dadosVenda <- read_excel("C:/Users/Breno/Downloads/relatorio_old_town_road (2).xlsx", sheet="infos_vendas")
+
+dadosProdutos <- read_excel("C:/Users/Breno/Downloads/relatorio_old_town_road (2).xlsx", sheet="infos_produtos")
+
+dadosIntermediarios <- dadosGerais %>% left_join(dadosVenda, by="SaleID")
+
+dadosFinais <- dadosIntermediarios %>% left_join(dadosProdutos, by="ItemID")
+
+dadosFinais$Receita <- dadosFinais$UnityPrice * dadosFinais$Quantity * 5.31
+
+dadosFinais$Ano <- format(as.Date(dadosFinais$Date), "%Y")
 ```
 
-descritiva $\ref{fig-g1}$ volta pra figura
+```{r}
 
+receitaLojaPorAno <- dadosFinais %>% group_by(Ano,StoreID) %>% summarise(receitaTOTALloja = sum(Receita))
 
+receitaTOTALmedia <- receitaLojaPorAno %>% group_by(Ano) %>% summarise(receitaMESIA = mean(receitaTOTALloja))
+
+ggplot(receitaTOTALmedia) +
+aes(x=Ano, y=receitaMESIA, group=1) +
+geom_line(size=1,colour="#A11D21") + geom_point(colour="#A11D21",
+size=2) +
+labs(title="Receita média das lojas ao longo do tempo",x="Ano", y="Receita Total Média das Lojas") +
+theme_estat()
+ggsave("series_uni.pdf", width = 158, height = 93, units = "mm")
+
+```
+
+De modo geral, ao analisar o gráfico, percebemos uma tendência de crescimento contínuo, com algumas flutuações pontuais que merecem destaque. A série indica que, ao final do período, as receitas atingiram o maior valor da década, refletindo um comportamento fortemente ascendente.
+  
+### 1880 a 1885 
+  
+Nos primeiros 4 anos, o aumento ocorreu de forma gradual, com o acréscimo médio de aproximadamente 3,3% ao ano, o que sugere uma fase inicial estável com crescimento moderado. De 1884 a 1885, verifica-se uma aceleração mais evidente no ritmo de crescimento, quando a receita média chega próxima da faixa de 130 mil reais.
+
+### 1885 a 1889
+
+O período de 1885 a 1888 apresenta pequenas oscilações, com sutil crescimento até 1887, e uma ligeira redução em 1888. Essa pequena queda, de cerca de 1,25%, não altera a trajetória geral da série, podendo indicar uma correção natural após aumentos sucessivos. Em seguida, o ano de 1889 evidencia o maior salto positivo de todo período, com crescimento estimado em mais de 15% em relação ao ano anterior.
+
+### Todo o período
+
+Ao analisar o comportamento geral, constata-se que o crescimento entre 1880 e 1889 foi de aproximadamente 47%, com uma média de crescimento anual próxima de 5%. A partir disso, constata-se que, mesmo diante de pequenas variações, houve uma tendencia de expansão ao longo da década.

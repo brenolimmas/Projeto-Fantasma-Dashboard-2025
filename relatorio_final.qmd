@@ -1,19 +1,24 @@
 ---
-title: "Modelo Projeto - Quarto"
+title: "Relatório de análise estatística - Old Town Road LTDA"
 
 # Nome do documento PDF gerado
 output-file: titulo do projeto
+documentclass: ./estat/estat
 ---
 
 ```{r}
 #| include: false
-source("rdocs/packages.R")
+source("rdocs/source/packages.R")
+library(ggplot2)
+library(readxl)
 ```
 
-# Introdução
-
-# Referencial Teórico
-
 # Análises
+## Receita média das lojas registrada nos anos de 1880 até 1889
+Nessa análise, veremos x x e y
+```{r}
+dados <- read_excel("C:/Users/Breno/Downloads/relatorio_old_town_road (1).xlsx")
 
-# Conclusões
+head(dados$ItemID)
+```
+
