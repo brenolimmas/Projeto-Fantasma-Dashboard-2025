@@ -1,77 +1,105 @@
 ---
 # Nome do arquivo PDF gerado na pasta resultado
-output-file: "Entrega 2"
+output-file: "Entrega 2 - Breno"
 ---
 
 ```{r setup}
 #| include: false
-source("rdocs/entrega_2.R")
+source("rdocs/source/packages.R")
+library(ggplot2)
+library(dplyr)
+library(readxl)
+library(kableExtra)
 ```
-
 
 ```{r}
-# Rodar apenas uma vez na vida!
-## Instalando o tinytex(pacote apenas)
-### CRAN version
-install.packages('tinytex')
-
-
-## Baixando o tinytex
-library(tinytex)
-tinytex::install_tinytex()
+dadosGerais <- read_excel("C:/Users/Breno/Downloads/relatorio_old_town_road (2).xlsx")
 ```
 
-# Objetivo
+## Variação de peso por altura dos clientes.
 
-Esse template foi criado para o alocado conseguir observar como ficaria sua análise o arquivo principal. É daqui que o gerente de projetos irá copiar a análise e inserir no documento principal que gerará o relatório estatístico.
-
-# Análises
-
-## Análise 3
-
-## Análise 4
+Nessa análise será observada a relação entre duas variáveis fundamentais em estudos corporais: peso (em quilogramas) e altura (em centímetros) dos clientes. A análise busca compreender de que forma essas variáveis se comportam em conjunto, verificando se há uma tendência de aumento do peso conforme cresce a altura, se ocorre o oposto ou se não existe uma relação significativa entre elas. Com base nos dados coletados das duas variáveis quantitativas contínuas, será aplicada uma análise estatística descritiva, permitindo identificar padrões, correlações e possíveis tendências que auxiliem na compreensão do perfil físico dos clientes.
 
 ```{r}
-#| label: fig-
-#| fig-cap: "Gráfico "
+  dadosClientes <- read_excel("C:/Users/Breno/Downloads/relatorio_old_town_road (2).xlsx", sheet="infos_clientes")
 
+dadosClientes$Peso = dadosClientes$Weight_lbs*0.4535
 
+dadosClientes$Altura = dadosClientes$Height_dm*10
+```
+### Altura
+```{r}
+  ggplot(dadosClientes) +
+aes(x=factor(""), y=Altura) +
+geom_boxplot(fill=c("#A11D21"), width = 0.5) +
+guides(fill=FALSE) +
+stat_summary(fun="mean", geom="point", shape=23, size=3, fill="white")+
+labs(title = "Boxplot da altura dos clientes",x="", y="Altura do cliente (cm)")+
+theme_estat()
+
+```
+
+```{r}
+print_quadro_resumo <- function(data, var_name, title = "Medidas resumo da variável") {
+var_name <- substitute(var_name)
+resumo <- data %>%
+    summarize(
+      Média = round(mean(!!sym(var_name), na.rm = TRUE), 2),
+      `Desvio Padrão` = round(sd(!!sym(var_name), na.rm = TRUE), 2),
+      Variância = round(var(!!sym(var_name), na.rm = TRUE), 2),
+      Mínimo = round(min(!!sym(var_name), na.rm = TRUE), 2),
+      `1º Quartil` = round(quantile(!!sym(var_name), probs = 0.25, na.rm = TRUE), 2),
+      Mediana = round(quantile(!!sym(var_name), probs = 0.5, na.rm = TRUE), 2),
+      `3º Quartil` = round(quantile(!!sym(var_name), probs = 0.75, na.rm = TRUE), 2),
+      Máximo = round(max(!!sym(var_name), na.rm = TRUE), 2)
+    ) %>%
+    t() %>%
+    as.data.frame() %>%
+    rownames_to_column("Estatística") %>%
+    rename(Valor = V1)
+
+  knitr::kable(
+    resumo,
+    caption = title,
+    align = "lc",
+    format = "latex",
+    booktabs = TRUE
+  ) %>%
+    ##Deixando o quadro no luger ceryo
+    kable_styling(latex_options = "H")
+}
+
+print_quadro_resumo(dadosClientes, Altura)
+
+```
+
+De modo geral, a altura dos clientes demonstra-se com uma variação moderada entre os indivíduos, com desvio padrão de 9,9cm, o que indica que a maioria dos clientes possui altura próxima à média, que é 171,48cm. No boxplot, é possível identificar outliers correspondentes aos clientes mais altos e mais baixos, sendo a maior altura registrada de 200 cm e a menor de 150 cm. Além disso, o valor da mediana (171,8cm), está muito próxima da média, sugerindo uma distribuição bastante simétrica.
+
+### Peso
+```{r}
+  ggplot(dadosClientes) +
+aes(x=factor(""), y=Peso) +
+geom_boxplot(fill=c("#A11D21"), width = 0.5) +
+guides(fill=FALSE) +
+stat_summary(fun="mean", geom="point", shape=23, size=3, fill="white")+
+labs(title = "Boxplot do peso dos clientes",x="", y="Peso do cliente (kg)")+
+theme_estat()
+
+print_quadro_resumo(dadosClientes, Peso)
+
+```
+
+Considerando os dados apresentados, o peso dos clientes também revela uma variação moderada entre os indivíduos, com desvio padrão de 11,9 kg, o que indica que a maioria apresenta valores próximos à média de 75,17 kg. No gráfico boxplot, é possível identificar outliers que representam os clientes com maiores e menores pesos, sendo o menor valor observado de 44,99 kg e o maior de 119,28 kg. Além disso, assim como na altura, a mediana (75,28 kg) encontra-se praticamente igual à média, sugerindo uma distribuição equilibrada e relativamente simétrica dos dados.
+
+### Relação entre as variáveis
+```{r}
+
+ggplot(dadosClientes,aes(x = Altura, y = Peso)) +
+geom_point(colour = "#A11D21", size = 3) + labs( title = "Gráfico de dispersão da relação entre altura e peso.", x="Altura do cliente (cm)", y="Peso do cliente (kg)") +  geom_smooth(method = "lm", colour = "#003366", linewidth = 1) +
+theme_estat()
+ggsave("disp_uni.pdf", width = 158, height = 93, units = "mm")
 
 ```
 
 
-::: {#quad- layout-align="center" quad-pos="H"}
-```{=latex}
-
-
-
-```
-
-Medidas resumo da 
-:::
-
-
-
-::: {#tbl-modalidades layout-align="center" tbl-pos="H"}
-```{=latex}
-
-
-```
-
-
-:::
-
-
-
-
-$\ref{fig-}$
-
-[@tbl-]
-
-
-[**Quadro** @quad-]
-
-
-
-
-
+O gráfico de dispersão apresenta uma tendência de crescimento clara, que significa, de maneira geral, que à medida que a altura aumenta, o peso tende também a crescer. Dessa maneira, com os pontos moderadamente concentrados em torno de uma linha ascendente, é perceptível uma relação linear positiva entre as duas variáveis apesar de existir leve dispersão. Além disso, o coeficiente de correlação de Pearson (0,6971) também reforça uma correlação positiva forte entre as variáveis. 
