@@ -61,7 +61,7 @@ resumo <- data %>%
   knitr::kable(
     resumo,
     caption = title,
-    align = "lc",
+    align = "|lc|",
     format = "latex",
     booktabs = TRUE
   ) %>%

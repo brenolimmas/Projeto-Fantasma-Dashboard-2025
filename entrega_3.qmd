@@ -1,79 +1,204 @@
 ---
 # Nome do arquivo PDF gerado na pasta resultado
 output-file: "Entrega 3"
+lang: pt-BR
 ---
 
 ```{r setup}
 #| include: false
 source("rdocs/entrega_3.R")
-```
-
-```{r}
-# Rodar apenas uma vez na vida!
-## Instalando o tinytex(pacote apenas)
-### CRAN version
-install.packages('tinytex')
 
 
-## Baixando o tinytex
 library(tinytex)
-tinytex::install_tinytex()
+library(kableExtra)
+
 ```
 
+# Idade dos clientes de Âmbar Seco a depender da loja.
+
+Nessa análise serão observadas as medidas de resumo das idades (em anos) dos clientes com o intuito de compreender melhor o perfil etário de tais em três cenários diferentes: os dados etários gerais da amostra disponibilizada, que contam com todas cidades e lojas, as análises na cidade de Âmbar Seco sem diferenciação por loja, e a análise que leva em conta as lojas de Âmbar Seco individualmente.Tais dados ajudarão a ter um melhor entendimento de quais são os perfis de idades dos clientes em diversos aspectos.
 
 
+## Idade de todos clientes da amostra
+```{r}
+  dadosGerais <- read_excel("C:/Users/Breno/Downloads/relatorio_old_town_road (2).xlsx", sheet = "relatorio_vendas")
 
-# Objetivo
+dadosLojas <- read_excel("C:/Users/Breno/Downloads/relatorio_old_town_road (2).xlsx", sheet = "infos_lojas")
 
-Esse template foi criado para o alocado conseguir observar como ficaria sua análise o arquivo principal. É daqui que o gerente de projetos irá copiar a análise e inserir no documento principal que gerará o relatório estatístico.
+dadosClientes <- read_excel("C:/Users/Breno/Downloads/relatorio_old_town_road (2).xlsx", sheet = "infos_clientes")
 
-# Análises
+dadosIntermediarioss <- dadosGerais %>% left_join(dadosLojas, by="StoreID")
 
-## Análise 5
+dadosFinaisss <- dadosIntermediarioss %>% left_join(dadosClientes,by="ClientID")
 
-## Análise 6
+dadosFinaiss <- distinct(dadosFinaisss,StoreID,NameStore,ClientID,Age,CityID)
+
+
+ggplot(dadosFinaiss) +
+aes(x=factor(""),y=dadosFinaiss$Age) +
+geom_boxplot(fill=c("#A11D21"), width = 0.5) +
+guides(fill=FALSE) +
+stat_summary(fun="mean", geom="point", shape=23, size=3, fill="white")+
+labs( title = "Figura 1: Boxplot da Idade",x="", y="Idade Geral (anos)")+
+theme_estat()
+```
 
 ```{r}
-#| label: fig-
-#| fig-cap: "Gráfico "
+print_quadro_resumo <- function(data, var_name,
+                                title = "Medidas resumo da variável",
+                                label = "quad:quadro_resumo1") {
 
+  var_name <- substitute(var_name)
+  
+  
+  resumo <- data %>%
+    summarize(
+      `Média` = round(mean(!!sym(var_name), na.rm = TRUE), 2),
+      `Desvio Padrão` = round(sd(!!sym(var_name), na.rm = TRUE), 2),
+      `Variância` = round(var(!!sym(var_name), na.rm = TRUE), 2),
+      `Mínimo` = round(min(!!sym(var_name), na.rm = TRUE), 2),
+      `1º Quartil` = round(quantile(!!sym(var_name), probs = .25, na.rm = TRUE), 2),
+      `Mediana` = round(quantile(!!sym(var_name), probs = .5, na.rm = TRUE), 2),
+      `3º Quartil` = round(quantile(!!sym(var_name), probs = .75, na.rm = TRUE), 2),
+      `Máximo` = round(max(!!sym(var_name), na.rm = TRUE), 2)
+    ) %>%
+    t() %>%
+    as.data.frame() %>%
+    rownames_to_column(var = "Estatística")
+  resumo$Estatística <- stringi::stri_trans_general(resumo$Estatística, "Latin-ASCII")
+
+  linhas <- paste0(
+    apply(resumo, 1, function(row) {
+      paste0(row[1], " & ", row[2], " \\\\")
+    }),
+    collapse = "\n"
+  )
+
+  latex <- paste0(
+"\\begin{quadro}[H]\n",
+"\\caption{", title, "}\n",
+"\\centering\n",
+"\\begin{adjustbox}{max width=\\textwidth}\n",
+"\\begin{tabular}{|l|r|}\n",
+"\\toprule\n",
+"\\textbf{Estatística} & \\textbf{Valor}\\\\\n",
+"\\midrule\n",
+linhas, "\n",
+"\\bottomrule\n",
+"\\end{tabular}\n",
+"\\label{", label, "}\n",
+"\\end{adjustbox}\n",
+"\\end{quadro}\n"
+  )
+
+  knitr::asis_output(latex)
+}
+
+
+print_quadro_resumo(dadosFinaiss, Age)
+```
+
+Levando em conta as idades de clientes disponibilizadas em todo plano amostral, a distribuição geral das idades dos clientes apresenta uma média de aproximadamente 37,5 anos, indicando que a maioria dos indivíduos se encontra na faixa etária adulta . O desvio padrão de 12,8 anos evidencia uma variação moderada nas idades observadas, sugerindo que há certa diferença no público analisado. A mediana de 36 anos confirma a concentração dos valores em torno da média, enquanto o intervalo entre o primeiro e o terceiro quartil (28 a 44 anos) mostra que metade dos clientes possui idade dentro dessa faixa. Os valores mínimo e máximo, 15 e 80 anos, indicam a presença de indivíduos tanto jovens quanto idosos na amostra, ainda que estes representem casos menos frequentes (outliers). 
+
+## Idade dos clientes de Âmbar Seco
+
+```{r}
+  cidadeAmbar <- dadosFinaiss[dadosFinaiss$CityID == 2,]
+
+  ggplot(cidadeAmbar) +
+aes(x=factor(""),y=cidadeAmbar$Age) +
+geom_boxplot(fill=c("#A11D21"), width = 0.5) +
+guides(fill=FALSE) +
+stat_summary(fun="mean", geom="point", shape=23, size=3, fill="white")+
+labs(title= "Figura 2: Boxplot da Idade",x="", y="Idade em Âmbar Seco (anos)")+
+theme_estat()
+
+print_quadro_resumo(cidadeAmbar, Age)
+
+```
+
+Nessa outra análise, levando em conta somente a pequena cidade de Âmbar Seco, é perceptível que a média de idade é de 35,9 anos, ligeiramente inferior à média geral da amostra (37,5 anos), indicando um público um pouco mais jovem. O desvio padrão de 10,5 anos e a variância de 109,4 mostram uma dispersão menor em comparação à amostra total, o que sugere maior homogeneidade nas idades dos clientes locais. A mediana de 35 anos reforça essa concentração em torno da média.
+
+## Idade dos clientes de Âmbar seco a partir da loja
+
+```{r}
+  ggplot(cidadeAmbar) +
+aes(x = reorder(NameStore, Age, FUN = median), y = Age) +
+geom_boxplot(fill = c("#A11D21"), width = 0.5) +
+stat_summary(
+fun = "mean", geom = "point", shape = 23, size = 3, fill = "white"
+) +
+labs(title = "Figura 3: Boxplot da Idade pelo nome da loja", x = "Nome da loja", y = "Idade dos clientes (anos)") +
+theme_estat()
+ggsave("box_bi.pdf", width = 158, height = 93, units = "mm")
+
+
+######################
+
+print_quadro_resumo_grande <- function(data, var_name,
+                                title = "Medidas resumo da variável",
+                                label = "quad:quadro_resumo1") {
+
+  var_name <- substitute(var_name)
+  group_var <- sym("NameStore") # <-- agrupamento por cidade
+  
+  resumo <- data %>%
+    group_by(!!group_var) %>%
+    summarize(
+      `Média` = round(mean(!!sym(var_name), na.rm = TRUE), 2),
+      `Desvio Padrão` = round(sd(!!sym(var_name), na.rm = TRUE), 2),
+      `Variância` = round(var(!!sym(var_name), na.rm = TRUE), 2),
+      `Mínimo` = round(min(!!sym(var_name), na.rm = TRUE), 2),
+      `1º Quartil` = round(quantile(!!sym(var_name), probs = .25, na.rm = TRUE), 2),
+      `Mediana` = round(quantile(!!sym(var_name), probs = .5, na.rm = TRUE), 2),
+      `3º Quartil` = round(quantile(!!sym(var_name), probs = .75, na.rm = TRUE), 2),
+      `Máximo` = round(max(!!sym(var_name), na.rm = TRUE), 2)
+    ) %>%
+    pivot_longer(-!!group_var, names_to = "Estatística", values_to = "Valor") %>%
+    pivot_wider(names_from = !!group_var, values_from = Valor) %>%
+    mutate(Estatística = stringi::stri_trans_general(Estatística, "Latin-ASCII"))
+  
+  linhas <- apply(resumo, 1, function(row) {
+    paste0(
+      row[1], " & ",
+      paste(row[-1], collapse = " & "),
+      " \\\\"
+    )
+  }) %>% paste0(collapse = "\n")
+  
+latex <- paste0(
+  "\\begin{quadro}[H]\n",
+  "\\caption{", title, "}\n",
+  "\\centering\n",
+  "\\begin{adjustbox}{max width=\\textwidth}\n",
+  "\\begin{tabular}{|l|", paste(rep("r", ncol(resumo) - 1), collapse = " "), "|r|}\n",
+  "\\toprule\n",
+  "\\textbf{Estatística} & ",
+  paste0(paste0("\\textbf{", names(resumo)[-1], "}"), collapse = " & "),
+  "\\\\\n",
+  "\\midrule\n",
+  linhas, "\n",
+  "\\bottomrule\n",
+  "\\end{tabular}\n",
+  "\\label{", label, "}\n",
+  "\\end{adjustbox}\n",
+  "\\end{quadro}\n"
+)
+
+  
+  knitr::asis_output(latex)
+}
+
+print_quadro_resumo_grande(cidadeAmbar, Age, title = "Medidas resumo da idade por cidade")
 
 
 ```
 
 
-::: {#quad- layout-align="center" quad-pos="H"}
-```{=latex}
+Considerando as quatro lojas avaliadas em Âmbar Seco, é notável diferenças no perfil etário de cada unidade. O boxplot indica que as lojas Ferraria Seca e Saloon concentram clientes mais jovens em comparação às outras duas lojas, com uma mediana próxima a 30 anos. Além disso, ambas apresentam uma maior dispersão entre os dados (desvio padrão mais alto de 13,31 e 12,70 respectivamente), o que indica um atendimento de públicos variados.
 
+A loja Banco Careca apresenta um comportamento mais homogêneo, com menor dispersão (desvio-padrão de 5,57) e idades concentradas entre 25 (mínimo) e 44 anos (máximo). Sua mediana (34 anos) e média (34,92) estão bastante próximas, o que indica uma distribuição mais simétrica. Esse padrão demonstra que o público dessa unidade é mais estável em termos de faixa etária.
 
+Já a Vendinha Rápida se destaca por possuir o público mais velho entre as quatro lojas. A média de idade (40,35 anos) e a mediana (41 anos) são superiores às das demais unidades, com valores concentrados entre 35 e 46 anos e pouca dispersão (desvio-padrão de 6,03). Isso aponta para uma clientela mais velha e com menor variação entre as idades.
 
-```
-
-Medidas resumo da 
-:::
-
-
-
-::: {#tbl-modalidades layout-align="center" tbl-pos="H"}
-```{=latex}
-
-
-```
-
-
-:::
-
-
-
-
-$\ref{fig-}$
-
-[@tbl-]
-
-
-[**Quadro** @quad-]
-
-
-
-
-
+Dessa maneira, é possível concluir que as lojas apresentam diferenças consideráveis no perfil etário de seus públicos.Esses resultados podem refletir diferenças no tipo de produto oferecido, na localização ou no posicionamento de cada loja dentro do mercado local.
