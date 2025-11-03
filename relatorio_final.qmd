@@ -6,19 +6,468 @@ output-file: titulo do projeto
 documentclass: ./estat/estat
 ---
 
-```{r}
+```{r setup}
 #| include: false
 source("rdocs/source/packages.R")
 library(ggplot2)
+library(dplyr)
 library(readxl)
+library(kableExtra)
+library(tinytex)
 ```
+
+# Introdução
+
+# Referencial Teórico
 
 # Análises
-## Receita média das lojas registrada nos anos de 1880 até 1889
-Nessa análise, veremos x x e y
-```{r}
-dados <- read_excel("C:/Users/Breno/Downloads/relatorio_old_town_road (1).xlsx")
 
-head(dados$ItemID)
+## Receita média das lojas registrada nos anos de 1880 até 1889
+Nessa análise, será observada, por ano, a média do faturamento bruto anual de cada uma das lojas descritas no plano amostral, no período de 1880 a 1889, com o objetivo de compreender se houve aumento ou diminuição da receita média ao longo desses anos. Serão analisadas duas variáveis: o ano das vendas, uma variável quantitativa discreta, e a receita média das lojas, que é uma variável quantitativa contínua, expressa em reais. Os valores consideram a cotação atual do dólar a R$ 5,31 para referência.
+```{r}
+dadosGerais <- read_excel("C:/Users/Breno/Downloads/relatorio_old_town_road (2).xlsx")
+
+dadosVenda <- read_excel("C:/Users/Breno/Downloads/relatorio_old_town_road (2).xlsx", sheet="infos_vendas")
+
+dadosProdutos <- read_excel("C:/Users/Breno/Downloads/relatorio_old_town_road (2).xlsx", sheet="infos_produtos")
+
+dadosIntermediarios <- dadosGerais %>% left_join(dadosVenda, by="SaleID")
+
+dadosFinais <- dadosIntermediarios %>% left_join(dadosProdutos, by="ItemID")
+
+dadosFinais$Receita <- dadosFinais$UnityPrice * dadosFinais$Quantity * 5.31
+
+dadosFinais$Ano <- format(as.Date(dadosFinais$Date), "%Y")
 ```
 
+```{r}
+
+receitaLojaPorAno <- dadosFinais %>% group_by(Ano,StoreID) %>% summarise(receitaTOTALloja = sum(Receita))
+
+receitaTOTALmedia <- receitaLojaPorAno %>% group_by(Ano) %>% summarise(receitaMESIA = mean(receitaTOTALloja))
+
+ggplot(receitaTOTALmedia) +
+aes(x=Ano, y=receitaMESIA, group=1) +
+geom_line(size=1,colour="#A11D21") + geom_point(colour="#A11D21",
+size=2) +
+labs(title="Receita média das lojas ao longo do tempo",x="Ano", y="Receita Total Média das Lojas") +
+theme_estat()
+ggsave("series_uni.pdf", width = 158, height = 93, units = "mm")
+
+estat_colors <- c(
+"#A11D21", "#003366", "#CC9900",
+"#663333", "#FF6600", "#CC9966",
+"#999966", "#006606", "#008091",
+"#041835", "#666666" )
+
+```
+
+De modo geral, ao analisar o gráfico, é perceptível uma tendência de crescimento contínuo, com algumas flutuações pontuais que merecem destaque. A série indica que, ao final do período, as receitas atingiram o maior valor da década, refletindo um comportamento fortemente ascendente.
+  
+### 1880 a 1885 
+  
+Nos primeiros 4 anos, o aumento ocorreu de forma gradual, com o acréscimo médio de aproximadamente 3,3% ao ano, o que sugere uma fase inicial estável com crescimento moderado. De 1884 a 1885, verifica-se uma aceleração mais evidente no ritmo de crescimento, quando a receita média chega próxima da faixa de 130 mil reais.
+
+### 1885 a 1889
+
+O período de 1885 a 1888 apresenta pequenas oscilações, com sutil crescimento até 1887, e uma ligeira redução em 1888. Essa pequena queda, de cerca de 1,25%, não altera a trajetória geral da série, podendo indicar uma correção natural após aumentos sucessivos. Em seguida, o ano de 1889 evidencia o maior salto positivo de todo período, com crescimento estimado em mais de 15% em relação ao ano anterior.
+
+### Todo o período
+
+Ao analisar o comportamento geral, constata-se que o crescimento entre 1880 e 1889 foi de aproximadamente 47%, com uma média de crescimento anual próxima de 5%. A partir disso, constata-se que, mesmo diante de pequenas variações, houve uma tendencia de expansão ao longo da década.
+
+## Variação de peso por altura dos clientes.
+
+Nessa análise será observada a relação entre duas variáveis fundamentais em estudos corporais: peso (em quilogramas) e altura (em centímetros) dos clientes. A análise busca compreender de que forma essas variáveis se comportam em conjunto, verificando se há uma tendência de aumento do peso conforme cresce a altura, se ocorre o oposto ou se não existe uma relação significativa entre elas. Com base nos dados coletados das duas variáveis quantitativas contínuas, será aplicada uma análise estatística descritiva, permitindo identificar padrões, correlações e possíveis tendências que auxiliem na compreensão do perfil físico dos clientes.
+
+```{r}
+  dadosClientes <- read_excel("C:/Users/Breno/Downloads/relatorio_old_town_road (2).xlsx", sheet="infos_clientes")
+
+dadosClientes$Peso = dadosClientes$Weight_lbs*0.4535
+
+dadosClientes$Altura = dadosClientes$Height_dm*10
+```
+### Altura
+```{r}
+  ggplot(dadosClientes) +
+aes(x=factor(""), y=Altura) +
+geom_boxplot(fill=c("#A11D21"), width = 0.5) +
+guides(fill=FALSE) +
+stat_summary(fun="mean", geom="point", shape=23, size=3, fill="white")+
+labs(title = "Boxplot da altura dos clientes",x="", y="Altura do cliente (cm)")+
+theme_estat()
+
+```
+
+```{r}
+  print_quadro_resumo <- function(data, var_name,
+                                title = "Medidas resumo da variável",
+                                label = "quad:quadro_resumo1") {
+
+  var_name <- substitute(var_name)
+  
+  
+  resumo <- data %>%
+    summarize(
+      `Média` = round(mean(!!sym(var_name), na.rm = TRUE), 2),
+      `Desvio Padrão` = round(sd(!!sym(var_name), na.rm = TRUE), 2),
+      `Variância` = round(var(!!sym(var_name), na.rm = TRUE), 2),
+      `Mínimo` = round(min(!!sym(var_name), na.rm = TRUE), 2),
+      `1º Quartil` = round(quantile(!!sym(var_name), probs = .25, na.rm = TRUE), 2),
+      `Mediana` = round(quantile(!!sym(var_name), probs = .5, na.rm = TRUE), 2),
+      `3º Quartil` = round(quantile(!!sym(var_name), probs = .75, na.rm = TRUE), 2),
+      `Máximo` = round(max(!!sym(var_name), na.rm = TRUE), 2)
+    ) %>%
+    t() %>%
+    as.data.frame() %>%
+    rownames_to_column(var = "Estatística")
+  resumo$Estatística <- stringi::stri_trans_general(resumo$Estatística, "Latin-ASCII")
+
+  linhas <- paste0(
+    apply(resumo, 1, function(row) {
+      paste0(row[1], " & ", row[2], " \\\\")
+    }),
+    collapse = "\n"
+  )
+
+  latex <- paste0(
+"\\begin{quadro}[H]\n",
+"\\caption{", title, "}\n",
+"\\centering\n",
+"\\begin{adjustbox}{max width=\\textwidth}\n",
+"\\begin{tabular}{|l|r|}\n",
+"\\toprule\n",
+"\\textbf{Estatística} & \\textbf{Valor}\\\\\n",
+"\\midrule\n",
+linhas, "\n",
+"\\bottomrule\n",
+"\\end{tabular}\n",
+"\\label{", label, "}\n",
+"\\end{adjustbox}\n",
+"\\end{quadro}\n"
+  )
+
+  knitr::asis_output(latex)
+}
+
+print_quadro_resumo(dadosClientes, Altura)
+
+```
+
+De modo geral, a altura dos clientes demonstra-se com uma variação moderada entre os indivíduos, com desvio padrão de 9,9cm, o que indica que a maioria dos clientes possui altura próxima à média, que é 171,48cm. No boxplot, é possível identificar outliers correspondentes aos clientes mais altos e mais baixos, sendo a maior altura registrada de 200 cm e a menor de 150 cm. Além disso, o valor da mediana (171,8cm), está muito próxima da média, sugerindo uma distribuição bastante simétrica.
+
+### Peso
+```{r}
+  ggplot(dadosClientes) +
+aes(x=factor(""), y=Peso) +
+geom_boxplot(fill=c("#A11D21"), width = 0.5) +
+guides(fill=FALSE) +
+stat_summary(fun="mean", geom="point", shape=23, size=3, fill="white")+
+labs(title = "Boxplot do peso dos clientes",x="", y="Peso do cliente (kg)")+
+theme_estat()
+
+print_quadro_resumo(dadosClientes, Peso)
+
+```
+
+Considerando os dados apresentados, o peso dos clientes também revela uma variação moderada entre os indivíduos, com desvio padrão de 11,9 kg, o que indica que a maioria apresenta valores próximos à média de 75,17 kg. No gráfico boxplot, é possível identificar outliers que representam os clientes com maiores e menores pesos, sendo o menor valor observado de 44,99 kg e o maior de 119,28 kg. Além disso, assim como na altura, a mediana (75,28 kg) encontra-se praticamente igual à média, sugerindo uma distribuição equilibrada e relativamente simétrica dos dados.
+
+### Relação entre as variáveis
+```{r}
+
+ggplot(dadosClientes,aes(x = Altura, y = Peso)) +
+geom_point(colour = "#A11D21", size = 3) + labs( title = "Gráfico de dispersão da relação entre altura e peso.", x="Altura do cliente (cm)", y="Peso do cliente (kg)") +  geom_smooth(method = "lm", colour = "#003366", linewidth = 1) +
+theme_estat()
+ggsave("disp_uni.pdf", width = 158, height = 93, units = "mm")
+
+```
+
+
+O gráfico de dispersão apresenta uma tendência de crescimento clara, que significa, de maneira geral, que à medida que a altura aumenta, o peso tende também a crescer. Dessa maneira, com os pontos moderadamente concentrados em torno de uma linha ascendente, é perceptível uma relação linear positiva entre as duas variáveis apesar de existir leve dispersão. Além disso, o coeficiente de correlação de Pearson (0,6971) também reforça uma correlação positiva forte entre as variáveis. 
+
+## Idade dos clientes de Âmbar Seco a depender da loja.
+
+Nessa análise serão observadas as medidas de resumo das idades (em anos) dos clientes com o intuito de compreender melhor o perfil etário de tais em três cenários diferentes: os dados etários gerais da amostra disponibilizada, que contam com todas cidades e lojas, as análises na cidade de Âmbar Seco sem diferenciação por loja, e a análise que leva em conta as lojas de Âmbar Seco individualmente.Tais dados ajudarão a ter um melhor entendimento de quais são os perfis de idades dos clientes em diversos aspectos.
+
+
+### Idade de todos clientes da amostra
+```{r}
+  dadosGerais <- read_excel("C:/Users/Breno/Downloads/relatorio_old_town_road (2).xlsx", sheet = "relatorio_vendas")
+
+dadosLojas <- read_excel("C:/Users/Breno/Downloads/relatorio_old_town_road (2).xlsx", sheet = "infos_lojas")
+
+dadosClientes <- read_excel("C:/Users/Breno/Downloads/relatorio_old_town_road (2).xlsx", sheet = "infos_clientes")
+
+dadosIntermediarioss <- dadosGerais %>% left_join(dadosLojas, by="StoreID")
+
+dadosFinaisss <- dadosIntermediarioss %>% left_join(dadosClientes,by="ClientID")
+
+dadosFinaiss <- distinct(dadosFinaisss,StoreID,NameStore,ClientID,Age,CityID)
+
+
+ggplot(dadosFinaiss) +
+aes(x=factor(""),y=dadosFinaiss$Age) +
+geom_boxplot(fill=c("#A11D21"), width = 0.5) +
+guides(fill=FALSE) +
+stat_summary(fun="mean", geom="point", shape=23, size=3, fill="white")+
+labs( title = "Figura 1: Boxplot da Idade",x="", y="Idade Geral (anos)")+
+theme_estat()
+
+print_quadro_resumo(dadosFinaiss, Age)
+```
+
+Levando em conta as idades de clientes disponibilizadas em todo plano amostral, a distribuição geral das idades dos clientes apresenta uma média de aproximadamente 37,5 anos, indicando que a maioria dos indivíduos se encontra na faixa etária adulta . O desvio padrão de 12,8 anos evidencia uma variação moderada nas idades observadas, sugerindo que há certa diferença no público analisado. A mediana de 36 anos confirma a concentração dos valores em torno da média, enquanto o intervalo entre o primeiro e o terceiro quartil (28 a 44 anos) mostra que metade dos clientes possui idade dentro dessa faixa. Os valores mínimo e máximo, 15 e 80 anos, indicam a presença de indivíduos tanto jovens quanto idosos na amostra, ainda que estes representem casos menos frequentes (outliers). 
+
+### Idade dos clientes de Âmbar Seco
+
+```{r}
+  cidadeAmbar <- dadosFinaiss[dadosFinaiss$CityID == 2,]
+
+  ggplot(cidadeAmbar) +
+aes(x=factor(""),y=cidadeAmbar$Age) +
+geom_boxplot(fill=c("#A11D21"), width = 0.5) +
+guides(fill=FALSE) +
+stat_summary(fun="mean", geom="point", shape=23, size=3, fill="white")+
+labs(title= "Figura 2: Boxplot da Idade",x="", y="Idade em Âmbar Seco (anos)")+
+theme_estat()
+
+print_quadro_resumo(cidadeAmbar, Age)
+
+```
+
+Nessa outra análise, levando em conta somente a pequena cidade de Âmbar Seco, é perceptível que a média de idade é de 35,9 anos, ligeiramente inferior à média geral da amostra (37,5 anos), indicando um público um pouco mais jovem. O desvio padrão de 10,5 anos e a variância de 109,4 mostram uma dispersão menor em comparação à amostra total, o que sugere maior homogeneidade nas idades dos clientes locais. A mediana de 35 anos reforça essa concentração em torno da média.
+
+### Idade dos clientes de Âmbar seco a partir da loja
+
+```{r}
+  ggplot(cidadeAmbar) +
+aes(x = reorder(NameStore, Age, FUN = median), y = Age) +
+geom_boxplot(fill = c("#A11D21"), width = 0.5) +
+stat_summary(
+fun = "mean", geom = "point", shape = 23, size = 3, fill = "white"
+) +
+labs(title = "Figura 3: Boxplot da Idade pelo nome da loja", x = "Nome da loja", y = "Idade dos clientes (anos)") +
+theme_estat()
+ggsave("box_bi.pdf", width = 158, height = 93, units = "mm")
+
+
+######################
+
+print_quadro_resumo_grande <- function(data, var_name,
+                                title = "Medidas resumo da variável",
+                                label = "quad:quadro_resumo1") {
+
+  var_name <- substitute(var_name)
+  group_var <- sym("NameStore")
+  
+  resumo <- data %>%
+    group_by(!!group_var) %>%
+    summarize(
+      `Média` = round(mean(!!sym(var_name), na.rm = TRUE), 2),
+      `Desvio Padrão` = round(sd(!!sym(var_name), na.rm = TRUE), 2),
+      `Variância` = round(var(!!sym(var_name), na.rm = TRUE), 2),
+      `Mínimo` = round(min(!!sym(var_name), na.rm = TRUE), 2),
+      `1º Quartil` = round(quantile(!!sym(var_name), probs = .25, na.rm = TRUE), 2),
+      `Mediana` = round(quantile(!!sym(var_name), probs = .5, na.rm = TRUE), 2),
+      `3º Quartil` = round(quantile(!!sym(var_name), probs = .75, na.rm = TRUE), 2),
+      `Máximo` = round(max(!!sym(var_name), na.rm = TRUE), 2)
+    ) %>%
+    pivot_longer(-!!group_var, names_to = "Estatística", values_to = "Valor") %>%
+    pivot_wider(names_from = !!group_var, values_from = Valor) %>%
+    mutate(Estatística = stringi::stri_trans_general(Estatística, "Latin-ASCII"))
+  
+  linhas <- apply(resumo, 1, function(row) {
+    paste0(
+      row[1], " & ",
+      paste(row[-1], collapse = " & "),
+      " \\\\"
+    )
+  }) %>% paste0(collapse = "\n")
+  
+latex <- paste0(
+  "\\begin{quadro}[H]\n",
+  "\\caption{", title, "}\n",
+  "\\centering\n",
+  "\\begin{adjustbox}{max width=\\textwidth}\n",
+  "\\begin{tabular}{|l|", paste(rep("r", ncol(resumo) - 1), collapse = " "), "|r|}\n",
+  "\\toprule\n",
+  "\\textbf{Estatística} & ",
+  paste0(paste0("\\textbf{", names(resumo)[-1], "}"), collapse = " & "),
+  "\\\\\n",
+  "\\midrule\n",
+  linhas, "\n",
+  "\\bottomrule\n",
+  "\\end{tabular}\n",
+  "\\label{", label, "}\n",
+  "\\end{adjustbox}\n",
+  "\\end{quadro}\n"
+)
+
+  
+  knitr::asis_output(latex)
+}
+
+print_quadro_resumo_grande(cidadeAmbar, Age, title = "Medidas resumo da idade por cidade")
+
+
+```
+
+
+Considerando as quatro lojas avaliadas em Âmbar Seco, é notável diferenças no perfil etário de cada unidade. O boxplot indica que as lojas Ferraria Seca e Saloon concentram clientes mais jovens em comparação às outras duas lojas, com uma mediana próxima a 30 anos. Além disso, ambas apresentam uma maior dispersão entre os dados (desvio padrão mais alto de 13,31 e 12,70 respectivamente), o que indica um atendimento de públicos variados.
+
+A loja Banco Careca apresenta um comportamento mais homogêneo, com menor dispersão (desvio-padrão de 5,57) e idades concentradas entre 25 (mínimo) e 44 anos (máximo). Sua mediana (34 anos) e média (34,92) estão bastante próximas, o que indica uma distribuição mais simétrica. Esse padrão demonstra que o público dessa unidade é mais estável em termos de faixa etária.
+
+Já a Vendinha Rápida se destaca por possuir o público mais velho entre as quatro lojas. A média de idade (40,35 anos) e a mediana (41 anos) são superiores às das demais unidades, com valores concentrados entre 35 e 46 anos e pouca dispersão (desvio-padrão de 6,03). Isso aponta para uma clientela mais velha e com menor variação entre as idades.
+
+Dessa maneira, é possível concluir que as lojas apresentam diferenças consideráveis no perfil etário de seus públicos.Esses resultados podem refletir diferenças no tipo de produto oferecido, na localização ou no posicionamento de cada loja dentro do mercado local.
+
+
+## O top 3 produtos mais vendidos nas top 3 lojas com maior receita em 1889.
+
+Nessa análise será observada a relação entre duas variáveis fundamentais para o desempenho comercial das lojas: os produtos mais vendidos e as lojas com maior receita no ano de 1889. A análise busca compreender de que forma essas variáveis se comportam em conjunto, verificando quais produtos concentram as maiores vendas nas principais lojas, se há predominância de determinados itens em alguma loja específica ou se a distribuição de vendas é equilibrada entre os produtos. Com base nos dados coletados dessas variáveis quantitativas, será aplicada uma análise estatística descritiva, permitindo identificar padrões, tendências de consumo e possíveis preferências dos clientes, auxiliando na compreensão do desempenho e perfil comercial das lojas.
+
+
+### As três lojas com maior receita no ano de 1889.
+
+```{r}
+dadosGerais <- read_excel("C:/Users/Breno/Downloads/relatorio_old_town_road (2).xlsx")
+
+dadosVenda <- read_excel("C:/Users/Breno/Downloads/relatorio_old_town_road (2).xlsx", sheet="infos_vendas")
+
+dadosProdutos <- read_excel("C:/Users/Breno/Downloads/relatorio_old_town_road (2).xlsx", sheet="infos_produtos")
+
+dadosIntermediarios <- dadosGerais %>% left_join(dadosVenda, by="SaleID")
+
+dadosFinais <- dadosIntermediarios %>% left_join(dadosProdutos, by="ItemID")
+
+dadosFinais$Receita <- dadosFinais$UnityPrice * dadosFinais$Quantity * 5.31
+
+dadosFinais$Ano <- format(as.Date(dadosFinais$Date), "%Y")
+
+
+dadosLojaz <- read_excel("C:/Users/Breno/Downloads/relatorio_old_town_road (2).xlsx", sheet="infos_lojas")
+
+dadosUltimos <- dadosFinais %>% left_join(dadosLojaz, by="StoreID")
+
+dados_1889 <- dadosUltimos %>%
+  filter(Ano == 1889)
+
+classes <- dados_1889 %>%
+  filter(!is.na(NameStore)) %>%
+  count(NameStore, wt = Receita) %>%
+  mutate(
+    freq = n,
+    relative_freq = round((freq / sum(freq)) * 100, 1),
+    freq = gsub("\\.", ",", relative_freq) %>% paste("%", sep = ""),
+    label = str_c(round(n,1), " (", freq, ")") %>% str_squish()
+  ) %>%
+  slice_max(n, n = 3)
+
+ggplot(classes) + aes(x = fct_reorder(NameStore, n, .desc=T), y = n, label = label) +
+  geom_bar(stat = "identity", fill = "#A11D21", width = 0.7) +
+  geom_text(
+    position = position_dodge(width = .9),
+    vjust = -0.5, #hjust = .5,
+    size = 3
+  ) +
+  labs(title = "Figura 8: gráfico de colunas da receita das lojas", x = "Nome da loja", y = "Receita da loja em 1889 (em R$)") +
+  theme_estat()
+
+ggsave("colunas-uni-freq.pdf", width = 158, height = 93, units = "mm")
+
+```
+
+A partir do que está descrito no gráfico, é possível concluir que as três lojas com maior receita no ano de 1889 foram: Loja "Ouro Fino" com aproximadamente 7,1% de todo faturamento do ano, Loja "TendTudo" ligeiramente abaixo da anterior com 7% da receita total, e "Ferraria Apache",com 6,5% da receita. A partir disso será feita a análise individual de cada uma dessas lojas para que seja analisado quais produtos foram predominantes nas vendas desse ano.
+
+### Os três mais vendidos na loja ouro fino
+
+```{r}
+  dadosOuroFino <- dados_1889 %>%
+  filter(NameStore == "Loja Ouro Fino")
+
+  contagem <- dadosOuroFino %>%
+  group_by(NameProduct) %>%
+  summarise(Freq = sum(Quantity)) %>%
+  mutate(Prop = round(100*(Freq/sum(Freq)), 1)) %>%
+  arrange(desc(NameProduct)) %>%
+  mutate(posicao = cumsum(Prop) - 0.5*Prop)
+
+ggplot(contagem) +
+  aes(x = factor(""), y = Prop , fill = factor(NameProduct)) + 
+  labs(title = "Figura 9: Gráfico de setores dos produtos mais vendidos") +
+  geom_bar(width = 1, stat = "identity") + coord_polar(theta = "y") +
+  geom_text(
+    aes(x = 1.8, y = posicao, label = paste0(Prop, "%")),
+    color = "black"
+  ) +
+  theme_void() +
+  theme(legend.position = "top") +
+  scale_fill_manual(values = estat_colors, name = 'Produto')
+
+ggsave("setor.pdf", width = 158, height = 93, units = "mm")
+```
+
+A partir dos valores apresentados no gráfico de setores, pode-se concluir que, na loja "Ouro Fino" em 1889, o produto mais vendido foi: "Botas de Couro" (13,3% da quantidade de vendas), seguido pelo "Whisky" (12,5%), e em terceiro "Chapéu de Couro" com 11,5% do total de vendas.
+
+### Os três mais vendidos na loja TendTudo
+
+```{r}
+  dadosOuroFino <- dados_1889 %>%
+  filter(NameStore == "Loja TendTudo")
+
+  contagem <- dadosOuroFino %>%
+  group_by(NameProduct) %>%
+  summarise(Freq = sum(Quantity)) %>%
+  mutate(Prop = round(100*(Freq/sum(Freq)), 1)) %>%
+  arrange(desc(NameProduct)) %>%
+  mutate(posicao = cumsum(Prop) - 0.5*Prop)
+
+ggplot(contagem) +
+  aes(x = factor(""), y = Prop , fill = factor(NameProduct)) + labs(title = "Figura 10: Gráfico de setores dos produtos mais vendidos") +
+  geom_bar(width = 1, stat = "identity") + coord_polar(theta = "y") +
+  geom_text(
+    aes(x = 1.8, y = posicao, label = paste0(Prop, "%")),
+    color = "black"
+  ) +
+  theme_void() +
+  theme(legend.position = "top") +
+  scale_fill_manual(values = estat_colors, name = 'Produto')
+
+ggsave("setor.pdf", width = 158, height = 93, units = "mm")
+```
+
+Com base nos valores exibidos no gráfico de setores, observa-se que, na loja "TendTudo" em 1889, o produto com maior volume de vendas foi a "Espingarda", representando 16,4% do total. Em seguida, aparece o "Whisky" com 15,1% e, em terceiro lugar, o "Colt .45", com 13,3% das vendas totais.
+
+### Os três mais vendidos na loja Ferraria Apache
+
+```{r}
+  dadosOuroFino <- dados_1889 %>%
+  filter(NameStore == "Ferraria Apache")
+
+  contagem <- dadosOuroFino %>%
+  group_by(NameProduct) %>%
+  summarise(Freq = sum(Quantity)) %>%
+  mutate(Prop = round(100*(Freq/sum(Freq)), 1)) %>%
+  arrange(desc(NameProduct)) %>%
+  mutate(posicao = cumsum(Prop) - 0.5*Prop)
+
+ggplot(contagem) +
+  aes(x = factor(""), y = Prop , fill = factor(NameProduct)) + labs(title = "Figura 11: Gráfico de setores dos produtos mais vendidos") +
+  geom_bar(width = 1, stat = "identity") + coord_polar(theta = "y") +
+  geom_text(
+    aes(x = 1.8, y = posicao, label = paste0(Prop, "%")),
+    color = "black"
+  ) +
+  theme_void() +
+  theme(legend.position = "top") +
+  scale_fill_manual(values = estat_colors, name = 'Produto')
+
+
+ggsave("setor.pdf", width = 158, height = 93, units = "mm")
+```
+
+A análise do gráfico de setores indica que, na "Ferraria Apache" no ano de 1889, o item mais comercializado foi o "Chapéu de Couro", correspondendo a 15,2% das vendas. Logo depois, figura a "Espingardaa" com 12,3%, seguido por dois produtos: "Machado" e "Whisky", que representaram 12% do total vendido.
+
+A partir da análise dos gráficos de setores das três lojas em 1889, observa-se que cada estabelecimento apresenta um padrão de vendas distinto, com produtos líderes diferentes em cada caso. Apesar disso, certos itens, como "Whisky" e "Chapéu de Couro", aparecem em mais de uma loja entre os mais vendidos, indicando uma demanda relativamente alta desses produtos no período. Além disso, a variação percentual entre os produtos mais vendidos mostra que, embora cada loja tenha seu produto mais vendido, a composição do top 3 evidencia a diversidade nas preferências dos clientes e na estratégia de vendas de cada loja.
+
+# Conclusão

@@ -140,7 +140,7 @@ print_quadro_resumo_grande <- function(data, var_name,
                                 label = "quad:quadro_resumo1") {
 
   var_name <- substitute(var_name)
-  group_var <- sym("NameStore") # <-- agrupamento por cidade
+  group_var <- sym("NameStore")
   
   resumo <- data %>%
     group_by(!!group_var) %>%

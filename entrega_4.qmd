@@ -1,0 +1,18 @@
+---
+# Nome do arquivo PDF gerado na pasta resultado
+output-file: "Entrega 2 - Breno"
+---
+
+```{r setup}
+#| include: false
+source("rdocs/source/packages.R")
+library(ggplot2)
+library(dplyr)
+library(readxl)
+library(kableExtra)
+```
+
+```{r}
+dadosGerais <- read_excel("C:/Users/Breno/Downloads/relatorio_old_town_road (2).xlsx")
+```
+
