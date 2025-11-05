@@ -18,7 +18,23 @@ library(tinytex)
 
 # Introdução
 
-# Referencial Teórico
+O seguinte relatório estatístico foi elaborado a pedido de João Sábio, proprietário da Old Town Road Ltda., uma holding que administra diversas empresas voltadas ao comércio no faroeste. O cliente demonstrou interesse em expandir seus investimentos para uma nova região e, para elaborar suas decisões, solicitou a realização de análises estatísticas descritivas e inferenciais que permitam compreender melhor o comportamento do mercado local, o perfil dos clientes e o desempenho comercial das lojas dessa área.
+
+As análises foram desenvolvidas a partir de um banco de dados disponibilizado e coletado pelo próprio cliente, contendo informações sobre receitas anuais específicas, características físicas dos consumidores, distribuição etária e volume de vendas de produtos.
+
+Todo o processamento e geração dos resultados foram realizados no software R, utilizando a versão mais recente disponível no momento da elaboração, por meio da ferramenta Quarto para integração entre código, texto e formatação automática dos resultados. O nível de significância adotado foi de 5% (α = 0,05) para todas as inferências estatísticas realizadas.
+
+Atendendo às solicitações do cliente, o relatório está dividido em quatro análises principais: Receita média das lojas registrada nos anos de 1880 a 1889, Variação de peso por altura dos clientes, Idade dos clientes de Âmbar Seco a depender da loja e Os três produtos mais vendidos nas três lojas com maior receita em 1889.
+
+# Metodologia
+
+As análises apresentadas neste relatório foram conduzidas com base no banco de dados fornecido por João Sábio, proprietário da Old Town Road, contendo informações referentes a receitas anuais das lojas, características físicas dos clientes (peso e altura), faixas etárias e registros de vendas de produtos. O conjunto de dados abrange o período de 1880 a 1889 e contempla observações provenientes de diferentes unidades comerciais controladas pela holding.
+
+Todos os procedimentos estatísticos foram realizados no software R, utilizando a versão vigente no momento da execução, por meio da plataforma Quarto para integração entre código e texto analítico. O relatório foi gerado automaticamente em formato LaTeX, de acordo com as especificações da padronização da empresa, assegurando consistência visual e padronização técnica. Foram aplicados o tema gráfico theme_estat(), a paleta de cores institucional estat_colors, e os comandos de formatação numérica padronizados, garantindo a correta representação de números, unidades e casas decimais.
+
+ Em casos de análise exclusivamente descritiva, foram calculadas as medidas resumo (média, mediana, quartis, desvio padrão, variância, valores mínimo e máximo), apresentadas em quadros formatados pela função print_quadro_resumo(), conforme as normas da ESTAT. Os valores foram arredondados para duas casas decimais, com separador decimal em vírgula e ponto para milhar, garantindo uniformidade numérica em todo o documento.
+ 
+ 
 
 # Análises
 
@@ -40,7 +56,8 @@ dadosFinais$Receita <- dadosFinais$UnityPrice * dadosFinais$Quantity * 5.31
 dadosFinais$Ano <- format(as.Date(dadosFinais$Date), "%Y")
 ```
 
-```{r}
+```{r fig-receita, fig.cap="Gráfico de linhas da receita média anual de 1880 a 1889"}
+
 
 receitaLojaPorAno <- dadosFinais %>% group_by(Ano,StoreID) %>% summarise(receitaTOTALloja = sum(Receita))
 
@@ -50,9 +67,11 @@ ggplot(receitaTOTALmedia) +
 aes(x=Ano, y=receitaMESIA, group=1) +
 geom_line(size=1,colour="#A11D21") + geom_point(colour="#A11D21",
 size=2) +
-labs(title="Receita média das lojas ao longo do tempo",x="Ano", y="Receita Total Média das Lojas") +
-theme_estat()
+labs( y="Receita Total Média das Lojas") +
+theme_estat(    plot.title = element_text(hjust = 1),
+)
 ggsave("series_uni.pdf", width = 158, height = 93, units = "mm")
+
 
 estat_colors <- c(
 "#A11D21", "#003366", "#CC9900",
@@ -62,7 +81,38 @@ estat_colors <- c(
 
 ```
 
-De modo geral, ao analisar o gráfico, é perceptível uma tendência de crescimento contínuo, com algumas flutuações pontuais que merecem destaque. A série indica que, ao final do período, as receitas atingiram o maior valor da década, refletindo um comportamento fortemente ascendente.
+
+
+
+
+\begin{table}[H]
+\centering
+\caption{Média das receitas e variação percentual entre 1880 e 1889}
+\label{tbl:receitas}
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{Anos} & \textbf{Média das receitas} & \textbf{Porcentagem de aumento} \\
+\hline
+1880 & 105.399,0 & - \\
+1881 & 112.110,0 & 6,37\% \\
+1882 & 112.452,4 & 0,31\% \\
+1883 & 116.856,9 & 3,92\% \\
+1884 & 119.989,8 & 2,68\% \\
+1885 & 129.969,0 & 8,32\% \\
+1886 & 130.989,2 & 0,78\% \\
+1887 & 135.444,8 & 3,40\% \\
+1888 & 133.757,6 & −1,25\% \\
+1889 & 155.009,1 & 15,89\% \\
+\midrule
+\textbf{Total} & 1.252.977,8 & 47,07\% \\
+\hline
+\end{tabular}
+\label{tab:receitas}
+\end{table}
+
+
+
+De modo geral, ao analisar a tabela acima e a [@fig-receita], é perceptível uma tendência de crescimento contínuo, com algumas flutuações pontuais que merecem destaque. A série indica que, ao final do período, as receitas atingiram o maior valor da década, refletindo um comportamento fortemente ascendente.
   
 ### 1880 a 1885 
   
@@ -88,20 +138,19 @@ dadosClientes$Peso = dadosClientes$Weight_lbs*0.4535
 dadosClientes$Altura = dadosClientes$Height_dm*10
 ```
 ### Altura
-```{r}
+```{r fig-altura, fig.cap="Boxplot da altura dos clientes."}
   ggplot(dadosClientes) +
 aes(x=factor(""), y=Altura) +
 geom_boxplot(fill=c("#A11D21"), width = 0.5) +
 guides(fill=FALSE) +
 stat_summary(fun="mean", geom="point", shape=23, size=3, fill="white")+
-labs(title = "Boxplot da altura dos clientes",x="", y="Altura do cliente (cm)")+
+labs(x="", y="Altura do cliente (cm)")+
 theme_estat()
 
 ```
 
 ```{r}
-  print_quadro_resumo <- function(data, var_name,
-                                title = "Medidas resumo da variável",
+  print_quadro_resumo <- function(data, var_name, title = "Medidas resumo da variável",
                                 label = "quad:quadro_resumo1") {
 
   var_name <- substitute(var_name)
@@ -136,11 +185,11 @@ theme_estat()
 "\\centering\n",
 "\\begin{adjustbox}{max width=\\textwidth}\n",
 "\\begin{tabular}{|l|r|}\n",
-"\\toprule\n",
+"\\hline\n",
 "\\textbf{Estatística} & \\textbf{Valor}\\\\\n",
-"\\midrule\n",
+"\\hline\n",
 linhas, "\n",
-"\\bottomrule\n",
+"\\hline\n",
 "\\end{tabular}\n",
 "\\label{", label, "}\n",
 "\\end{adjustbox}\n",
@@ -154,36 +203,39 @@ print_quadro_resumo(dadosClientes, Altura)
 
 ```
 
-De modo geral, a altura dos clientes demonstra-se com uma variação moderada entre os indivíduos, com desvio padrão de 9,9cm, o que indica que a maioria dos clientes possui altura próxima à média, que é 171,48cm. No boxplot, é possível identificar outliers correspondentes aos clientes mais altos e mais baixos, sendo a maior altura registrada de 200 cm e a menor de 150 cm. Além disso, o valor da mediana (171,8cm), está muito próxima da média, sugerindo uma distribuição bastante simétrica.
+De modo geral, de acordo com o que pode ser percebido na tabela acima e na @fig-altura, a altura dos clientes demonstra-se com uma variação moderada entre os indivíduos, com desvio padrão de 9,9cm, o que indica que a maioria dos clientes possui altura próxima à média, que é 171,48cm. Ainda na @fig-altura, é possível identificar outliers correspondentes aos clientes mais altos e mais baixos, sendo a maior altura registrada de 200 cm e a menor de 150 cm. Além disso, o valor da mediana (171,8cm), está muito próxima da média, sugerindo uma distribuição bastante simétrica.
 
 ### Peso
-```{r}
+
+```{r fig-peso, fig.cap="Boxplot do peso dos clientes."}
   ggplot(dadosClientes) +
 aes(x=factor(""), y=Peso) +
 geom_boxplot(fill=c("#A11D21"), width = 0.5) +
 guides(fill=FALSE) +
 stat_summary(fun="mean", geom="point", shape=23, size=3, fill="white")+
-labs(title = "Boxplot do peso dos clientes",x="", y="Peso do cliente (kg)")+
+labs(x="", y="Peso do cliente (kg)")+
 theme_estat()
+```
 
+```{r}
 print_quadro_resumo(dadosClientes, Peso)
 
 ```
 
-Considerando os dados apresentados, o peso dos clientes também revela uma variação moderada entre os indivíduos, com desvio padrão de 11,9 kg, o que indica que a maioria apresenta valores próximos à média de 75,17 kg. No gráfico boxplot, é possível identificar outliers que representam os clientes com maiores e menores pesos, sendo o menor valor observado de 44,99 kg e o maior de 119,28 kg. Além disso, assim como na altura, a mediana (75,28 kg) encontra-se praticamente igual à média, sugerindo uma distribuição equilibrada e relativamente simétrica dos dados.
+Considerando os dados apresentados na tabela acima e na @fig-peso, o peso dos clientes também revela uma variação moderada entre os indivíduos, com desvio padrão de 11,9 kg, o que indica que a maioria apresenta valores próximos à média de 75,17 kg. Ainda na @fig-peso, é possível identificar outliers que representam os clientes com maiores e menores pesos, sendo o menor valor observado de 44,99 kg e o maior de 119,28 kg. Além disso, assim como na altura, a mediana (75,28 kg) encontra-se praticamente igual à média, sugerindo uma distribuição equilibrada e relativamente simétrica dos dados.
 
 ### Relação entre as variáveis
-```{r}
+```{r fig-rel-peso,fig.cap="Gráfico de dispersão da altura pelo peso."}
 
 ggplot(dadosClientes,aes(x = Altura, y = Peso)) +
-geom_point(colour = "#A11D21", size = 3) + labs( title = "Gráfico de dispersão da relação entre altura e peso.", x="Altura do cliente (cm)", y="Peso do cliente (kg)") +  geom_smooth(method = "lm", colour = "#003366", linewidth = 1) +
+geom_point(colour = "#A11D21", size = 3, alpha = 0.5) + labs( x="Altura do cliente (cm)", y="Peso do cliente (kg)") +  geom_smooth(method = "lm", colour = "#003366", linewidth = 1) +  
 theme_estat()
 ggsave("disp_uni.pdf", width = 158, height = 93, units = "mm")
 
 ```
 
 
-O gráfico de dispersão apresenta uma tendência de crescimento clara, que significa, de maneira geral, que à medida que a altura aumenta, o peso tende também a crescer. Dessa maneira, com os pontos moderadamente concentrados em torno de uma linha ascendente, é perceptível uma relação linear positiva entre as duas variáveis apesar de existir leve dispersão. Além disso, o coeficiente de correlação de Pearson (0,6971) também reforça uma correlação positiva forte entre as variáveis. 
+A @fig-rel-peso apresenta uma tendência de crescimento clara, que significa, de maneira geral, que à medida que a altura aumenta, o peso tende também a crescer. Dessa maneira, com os pontos moderadamente concentrados em torno de uma linha ascendente, é perceptível uma relação linear positiva entre as duas variáveis apesar de existir leve dispersão. Além disso, o coeficiente de correlação de Pearson, que é uma medida estatística que indica a força e a direção da relação linear entre duas variáveis numéricas variando sua força de relação entre -1 (relação negativa) e 1 (relação positiva), de 0,6971 também reforça uma correlação positiva forte entre as variáveis. 
 
 ## Idade dos clientes de Âmbar Seco a depender da loja.
 
@@ -191,6 +243,9 @@ Nessa análise serão observadas as medidas de resumo das idades (em anos) dos c
 
 
 ### Idade de todos clientes da amostra
+
+Nessa análise, serão consideradas as idades de todos clientes disponibilizadas em todo plano amostral, sem diferenciação por qualquer variável. Com isso, é possível ter uma análise mais ampla e comparativa com cenários mais específicos.
+
 ```{r}
   dadosGerais <- read_excel("C:/Users/Breno/Downloads/relatorio_old_town_road (2).xlsx", sheet = "relatorio_vendas")
 
@@ -204,23 +259,29 @@ dadosFinaisss <- dadosIntermediarioss %>% left_join(dadosClientes,by="ClientID")
 
 dadosFinaiss <- distinct(dadosFinaisss,StoreID,NameStore,ClientID,Age,CityID)
 
+```
 
+```{r fig-idade-geral, fig.cap= "Boxplot da Idade"}
 ggplot(dadosFinaiss) +
 aes(x=factor(""),y=dadosFinaiss$Age) +
 geom_boxplot(fill=c("#A11D21"), width = 0.5) +
 guides(fill=FALSE) +
 stat_summary(fun="mean", geom="point", shape=23, size=3, fill="white")+
-labs( title = "Figura 1: Boxplot da Idade",x="", y="Idade Geral (anos)")+
+labs( x="", y="Idade Geral (anos)")+
 theme_estat()
+```
 
+```{r}
 print_quadro_resumo(dadosFinaiss, Age)
 ```
 
-Levando em conta as idades de clientes disponibilizadas em todo plano amostral, a distribuição geral das idades dos clientes apresenta uma média de aproximadamente 37,5 anos, indicando que a maioria dos indivíduos se encontra na faixa etária adulta . O desvio padrão de 12,8 anos evidencia uma variação moderada nas idades observadas, sugerindo que há certa diferença no público analisado. A mediana de 36 anos confirma a concentração dos valores em torno da média, enquanto o intervalo entre o primeiro e o terceiro quartil (28 a 44 anos) mostra que metade dos clientes possui idade dentro dessa faixa. Os valores mínimo e máximo, 15 e 80 anos, indicam a presença de indivíduos tanto jovens quanto idosos na amostra, ainda que estes representem casos menos frequentes (outliers). 
+Levando em conta a tabela acima e a @fig-idade-geral, a distribuição geral das idades dos clientes apresenta uma média de aproximadamente 37,5 anos, indicando que a maioria dos indivíduos se encontra na faixa etária adulta . O desvio padrão de 12,8 anos evidencia uma variação moderada nas idades observadas, sugerindo que há certa diferença no público analisado. A mediana de 36 anos confirma a concentração dos valores em torno da média, enquanto o intervalo entre o primeiro e o terceiro quartil (28 a 44 anos) mostra que metade dos clientes possui idade dentro dessa faixa. Os valores mínimo e máximo, 15 e 80 anos, indicam a presença de indivíduos tanto jovens quanto idosos na amostra, ainda que estes representem casos menos frequentes (outliers). 
 
 ### Idade dos clientes de Âmbar Seco
 
-```{r}
+Nessa outra análise, é levado em conta somente os dados de idades da pequena cidade de Âmbar Seco, com intuito de aprofundar mais no cenário local antes da análise pedida.
+
+```{r fig-idade-ambar, fig.cap= "Boxplot da Idade"}
   cidadeAmbar <- dadosFinaiss[dadosFinaiss$CityID == 2,]
 
   ggplot(cidadeAmbar) +
@@ -228,30 +289,34 @@ aes(x=factor(""),y=cidadeAmbar$Age) +
 geom_boxplot(fill=c("#A11D21"), width = 0.5) +
 guides(fill=FALSE) +
 stat_summary(fun="mean", geom="point", shape=23, size=3, fill="white")+
-labs(title= "Figura 2: Boxplot da Idade",x="", y="Idade em Âmbar Seco (anos)")+
+labs(x="", y="Idade em Âmbar Seco (anos)")+
 theme_estat()
+```
 
+```{r}
 print_quadro_resumo(cidadeAmbar, Age)
 
 ```
 
-Nessa outra análise, levando em conta somente a pequena cidade de Âmbar Seco, é perceptível que a média de idade é de 35,9 anos, ligeiramente inferior à média geral da amostra (37,5 anos), indicando um público um pouco mais jovem. O desvio padrão de 10,5 anos e a variância de 109,4 mostram uma dispersão menor em comparação à amostra total, o que sugere maior homogeneidade nas idades dos clientes locais. A mediana de 35 anos reforça essa concentração em torno da média.
+Nessa outra análise, levando em conta a tabela de medidas acima e a @fig-idade-ambar, é perceptível que a média de idade é de 35,9 anos, ligeiramente inferior à média geral da amostra (37,5 anos), indicando um público um pouco mais jovem. O desvio padrão de 10,5 anos e a variância de 109,4 mostram uma dispersão menor em comparação à amostra total, o que sugere maior homogeneidade nas idades dos clientes locais. A mediana de 35 anos reforça essa concentração em torno da média.
 
 ### Idade dos clientes de Âmbar seco a partir da loja
 
-```{r}
+Nessa última análise, será possível observar um cenário mais específico, e que foi o proposto desde o início: a relação etária nas lojas de Âmbar Seco. 
+
+```{r fig-idade-lojas, fig.cap= "Boxplot bivariado da idade pelo nome da loja."}
   ggplot(cidadeAmbar) +
 aes(x = reorder(NameStore, Age, FUN = median), y = Age) +
 geom_boxplot(fill = c("#A11D21"), width = 0.5) +
 stat_summary(
 fun = "mean", geom = "point", shape = 23, size = 3, fill = "white"
 ) +
-labs(title = "Figura 3: Boxplot da Idade pelo nome da loja", x = "Nome da loja", y = "Idade dos clientes (anos)") +
+labs( x = "Nome da loja", y = "Idade dos clientes (anos)") +
 theme_estat()
 ggsave("box_bi.pdf", width = 158, height = 93, units = "mm")
+```
 
-
-######################
+```{r}
 
 print_quadro_resumo_grande <- function(data, var_name,
                                 title = "Medidas resumo da variável",
@@ -290,13 +355,13 @@ latex <- paste0(
   "\\centering\n",
   "\\begin{adjustbox}{max width=\\textwidth}\n",
   "\\begin{tabular}{|l|", paste(rep("r", ncol(resumo) - 1), collapse = " "), "|r|}\n",
-  "\\toprule\n",
+  "\\hline\n",
   "\\textbf{Estatística} & ",
   paste0(paste0("\\textbf{", names(resumo)[-1], "}"), collapse = " & "),
   "\\\\\n",
-  "\\midrule\n",
+  "\\hline\n",
   linhas, "\n",
-  "\\bottomrule\n",
+  "\\hline\n",
   "\\end{tabular}\n",
   "\\label{", label, "}\n",
   "\\end{adjustbox}\n",
@@ -313,7 +378,7 @@ print_quadro_resumo_grande(cidadeAmbar, Age, title = "Medidas resumo da idade po
 ```
 
 
-Considerando as quatro lojas avaliadas em Âmbar Seco, é notável diferenças no perfil etário de cada unidade. O boxplot indica que as lojas Ferraria Seca e Saloon concentram clientes mais jovens em comparação às outras duas lojas, com uma mediana próxima a 30 anos. Além disso, ambas apresentam uma maior dispersão entre os dados (desvio padrão mais alto de 13,31 e 12,70 respectivamente), o que indica um atendimento de públicos variados.
+Considerando a tabela de medidas resumo de cada loja, e a @fig-idade-lojas, é notável diferenças no perfil etário das quatro lojas avaliadas em Âmbar Seco. O boxplot indica que as lojas Ferraria Seca e Saloon concentram clientes mais jovens em comparação às outras duas lojas, com uma mediana próxima a 30 anos. Além disso, ambas apresentam uma maior dispersão entre os dados (desvio padrão mais alto de 13,31 e 12,70 respectivamente), o que indica um atendimento de públicos variados.
 
 A loja Banco Careca apresenta um comportamento mais homogêneo, com menor dispersão (desvio-padrão de 5,57) e idades concentradas entre 25 (mínimo) e 44 anos (máximo). Sua mediana (34 anos) e média (34,92) estão bastante próximas, o que indica uma distribuição mais simétrica. Esse padrão demonstra que o público dessa unidade é mais estável em termos de faixa etária.
 
@@ -329,7 +394,7 @@ Nessa análise será observada a relação entre duas variáveis fundamentais pa
 
 ### As três lojas com maior receita no ano de 1889.
 
-```{r}
+```{r fig-tres-maiores, fig.cap= "Gráfico de colunas da receita das lojas."}
 dadosGerais <- read_excel("C:/Users/Breno/Downloads/relatorio_old_town_road (2).xlsx")
 
 dadosVenda <- read_excel("C:/Users/Breno/Downloads/relatorio_old_town_road (2).xlsx", sheet="infos_vendas")
@@ -367,21 +432,21 @@ ggplot(classes) + aes(x = fct_reorder(NameStore, n, .desc=T), y = n, label = lab
   geom_bar(stat = "identity", fill = "#A11D21", width = 0.7) +
   geom_text(
     position = position_dodge(width = .9),
-    vjust = -0.5, #hjust = .5,
+    vjust = -0.5, hjust = .5,
     size = 3
   ) +
-  labs(title = "Figura 8: gráfico de colunas da receita das lojas", x = "Nome da loja", y = "Receita da loja em 1889 (em R$)") +
+  labs( x = "Nome da loja", y = "Receita da loja em 1889 (em R$)") +
   theme_estat()
 
 ggsave("colunas-uni-freq.pdf", width = 158, height = 93, units = "mm")
 
 ```
 
-A partir do que está descrito no gráfico, é possível concluir que as três lojas com maior receita no ano de 1889 foram: Loja "Ouro Fino" com aproximadamente 7,1% de todo faturamento do ano, Loja "TendTudo" ligeiramente abaixo da anterior com 7% da receita total, e "Ferraria Apache",com 6,5% da receita. A partir disso será feita a análise individual de cada uma dessas lojas para que seja analisado quais produtos foram predominantes nas vendas desse ano.
+A partir do que está descrito na @fig-tres-maiores, é possível concluir que as três lojas com maior receita no ano de 1889 foram: Loja "Ouro Fino" com aproximadamente 7,1% de todo faturamento do ano, Loja "TendTudo" ligeiramente abaixo da anterior com 7% da receita total, e "Ferraria Apache",com 6,5% da receita. A partir disso será feita a análise individual de cada uma dessas lojas para que seja analisado quais produtos foram predominantes nas vendas desse ano.
 
 ### Os três mais vendidos na loja ouro fino
 
-```{r}
+```{r fig-ouro-fino, fig.cap= "Gráfico de setores dos produtos mais vendidos."}
   dadosOuroFino <- dados_1889 %>%
   filter(NameStore == "Loja Ouro Fino")
 
@@ -393,25 +458,24 @@ A partir do que está descrito no gráfico, é possível concluir que as três l
   mutate(posicao = cumsum(Prop) - 0.5*Prop)
 
 ggplot(contagem) +
-  aes(x = factor(""), y = Prop , fill = factor(NameProduct)) + 
-  labs(title = "Figura 9: Gráfico de setores dos produtos mais vendidos") +
+  aes(x = factor(""), y = Prop , fill = factor(NameProduct)) +
   geom_bar(width = 1, stat = "identity") + coord_polar(theta = "y") +
   geom_text(
     aes(x = 1.8, y = posicao, label = paste0(Prop, "%")),
     color = "black"
   ) +
   theme_void() +
-  theme(legend.position = "top") +
+  theme(legend.position = "top", plot.title = element_text(hjust = 0.8)) +
   scale_fill_manual(values = estat_colors, name = 'Produto')
 
 ggsave("setor.pdf", width = 158, height = 93, units = "mm")
 ```
 
-A partir dos valores apresentados no gráfico de setores, pode-se concluir que, na loja "Ouro Fino" em 1889, o produto mais vendido foi: "Botas de Couro" (13,3% da quantidade de vendas), seguido pelo "Whisky" (12,5%), e em terceiro "Chapéu de Couro" com 11,5% do total de vendas.
+A partir dos valores apresentados na @fig-ouro-fino, pode-se concluir que, na loja "Ouro Fino" em 1889, o produto mais vendido foi: "Botas de Couro" (13,3% da quantidade de vendas), seguido pelo "Whisky" (12,5%), e em terceiro "Chapéu de Couro" com 11,5% do total de vendas.
 
 ### Os três mais vendidos na loja TendTudo
 
-```{r}
+```{r fig-tendtudo, fig.cap= "Gráfico de setores dos produtos mais vendidos."}
   dadosOuroFino <- dados_1889 %>%
   filter(NameStore == "Loja TendTudo")
 
@@ -423,24 +487,24 @@ A partir dos valores apresentados no gráfico de setores, pode-se concluir que, 
   mutate(posicao = cumsum(Prop) - 0.5*Prop)
 
 ggplot(contagem) +
-  aes(x = factor(""), y = Prop , fill = factor(NameProduct)) + labs(title = "Figura 10: Gráfico de setores dos produtos mais vendidos") +
+  aes(x = factor(""), y = Prop , fill = factor(NameProduct)) +
   geom_bar(width = 1, stat = "identity") + coord_polar(theta = "y") +
   geom_text(
     aes(x = 1.8, y = posicao, label = paste0(Prop, "%")),
     color = "black"
   ) +
   theme_void() +
-  theme(legend.position = "top") +
+  theme(legend.position = "top", plot.title = element_text(hjust = 0.8),) +
   scale_fill_manual(values = estat_colors, name = 'Produto')
 
 ggsave("setor.pdf", width = 158, height = 93, units = "mm")
 ```
 
-Com base nos valores exibidos no gráfico de setores, observa-se que, na loja "TendTudo" em 1889, o produto com maior volume de vendas foi a "Espingarda", representando 16,4% do total. Em seguida, aparece o "Whisky" com 15,1% e, em terceiro lugar, o "Colt .45", com 13,3% das vendas totais.
+Com base nos valores exibidos na @fig-tendtudo, observa-se que, na loja "TendTudo" em 1889, o produto com maior volume de vendas foi a "Espingarda", representando 16,4% do total. Em seguida, aparece o "Whisky" com 15,1% e, em terceiro lugar, o "Colt .45", com 13,3% das vendas totais.
 
 ### Os três mais vendidos na loja Ferraria Apache
 
-```{r}
+```{r fig-ferraria, fig.cap= "Gráfico de setores dos produtos mais vendidos."}
   dadosOuroFino <- dados_1889 %>%
   filter(NameStore == "Ferraria Apache")
 
@@ -459,15 +523,19 @@ ggplot(contagem) +
     color = "black"
   ) +
   theme_void() +
-  theme(legend.position = "top") +
+  theme(legend.position = "top", plot.title = element_text(hjust = 0.8)) +
   scale_fill_manual(values = estat_colors, name = 'Produto')
 
 
 ggsave("setor.pdf", width = 158, height = 93, units = "mm")
 ```
 
-A análise do gráfico de setores indica que, na "Ferraria Apache" no ano de 1889, o item mais comercializado foi o "Chapéu de Couro", correspondendo a 15,2% das vendas. Logo depois, figura a "Espingardaa" com 12,3%, seguido por dois produtos: "Machado" e "Whisky", que representaram 12% do total vendido.
+A análise da @fig-ferraria indica que, na "Ferraria Apache", no ano de 1889, o item mais comercializado foi o "Chapéu de Couro", correspondendo a 15,2% das vendas. Logo depois, figura a "Espingardaa" com 12,3%, seguido por dois produtos: "Machado" e "Whisky", que representaram 12% do total vendido.
 
 A partir da análise dos gráficos de setores das três lojas em 1889, observa-se que cada estabelecimento apresenta um padrão de vendas distinto, com produtos líderes diferentes em cada caso. Apesar disso, certos itens, como "Whisky" e "Chapéu de Couro", aparecem em mais de uma loja entre os mais vendidos, indicando uma demanda relativamente alta desses produtos no período. Além disso, a variação percentual entre os produtos mais vendidos mostra que, embora cada loja tenha seu produto mais vendido, a composição do top 3 evidencia a diversidade nas preferências dos clientes e na estratégia de vendas de cada loja.
 
 # Conclusão
+
+Com base nas análises realizadas a partir do banco de dados disponibilizado por João Sábio, proprietário da Old Town Road, foi possível obter uma visão abrangente sobre o desempenho das lojas e o perfil dos clientes da região estudada. Os resultados apresentados permitem identificar tendências relevantes para o planejamento estratégico e a tomada de decisão do cliente no contexto comercial do faroeste.
+
+De maneira geral, os resultados obtidos indicam que o mercado regional analisado apresenta crescimento consistente, consumidores com perfis bem definidos e tendências comerciais diversificadas entre as unidades de negócio. As informações geradas a partir deste estudo fornecem dados concretos para o planejamento e expansão das atividades da Old Town Road, apoiando decisões futuras de investimento, segmentação de público e otimização de portfólio de produtos.

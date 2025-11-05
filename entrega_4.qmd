@@ -16,3 +16,9 @@ library(kableExtra)
 dadosGerais <- read_excel("C:/Users/Breno/Downloads/relatorio_old_town_road (2).xlsx")
 ```
 
+## O top 3 produtos mais vendidos nas top 3 lojas com maior receita em 1889.
+
+
+### Receita geral das lojas no ano de 1889.
+
+### 
