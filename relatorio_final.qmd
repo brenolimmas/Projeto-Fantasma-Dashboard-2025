@@ -28,13 +28,185 @@ Atendendo às solicitações do cliente, o relatório está dividido em quatro a
 
 # Metodologia
 
-As análises apresentadas neste relatório foram conduzidas com base no banco de dados fornecido por João Sábio, proprietário da Old Town Road, contendo informações referentes a receitas anuais das lojas, características físicas dos clientes (peso e altura), faixas etárias e registros de vendas de produtos. O conjunto de dados abrange o período de 1880 a 1889 e contempla observações provenientes de diferentes unidades comerciais controladas pela holding.
-
-Todos os procedimentos estatísticos foram realizados no software R, utilizando a versão vigente no momento da execução, por meio da plataforma Quarto para integração entre código e texto analítico. O relatório foi gerado automaticamente em formato LaTeX, de acordo com as especificações da padronização da empresa, assegurando consistência visual e padronização técnica. Foram aplicados o tema gráfico theme_estat(), a paleta de cores institucional estat_colors, e os comandos de formatação numérica padronizados, garantindo a correta representação de números, unidades e casas decimais.
-
- Em casos de análise exclusivamente descritiva, foram calculadas as medidas resumo (média, mediana, quartis, desvio padrão, variância, valores mínimo e máximo), apresentadas em quadros formatados pela função print_quadro_resumo(), conforme as normas da ESTAT. Os valores foram arredondados para duas casas decimais, com separador decimal em vírgula e ponto para milhar, garantindo uniformidade numérica em todo o documento.
+Este relatório é composto por técnicas estatísticas que serão descristas a seguir de acordo com o que foi utilizado em tal estudo:
  
- 
+## Frequência Relativa
+
+A frequência relativa é utilizada para a comparação entre classes de uma variável categórica com $c$ categorias, ou para comparar uma mesma categoria em diferentes estudos.
+
+A frequência relativa da categoria $j$ é dada por:
+
+$$
+f_j=\frac{n_j}{n}
+$$
+
+Com:
+
+-   $j = 1, \, ..., \, c$
+
+-   $n_j =$ número de observações da categoria $j$
+
+-   $n =$ número total de observações
+
+Geralmente, a frequência relativa é utilizada em porcentagem, dada por:
+
+$$100 \times f_j$$
+
+## Média
+
+A média é a soma das observações dividida pelo número total delas, dada pela fórmula:
+
+$$\bar{X}=\frac{\sum\limits_{i=1}^{n}X_i}{n}$$
+
+Com:
+
+-   $i = 1, \, 2, \, ..., \, n$
+
+-   $n =$ número total de observações
+
+## Mediana
+
+Sejam as $n$ observações de um conjunto de dados $X=X_{(1)},X_{(2)},\ldots, X_{(n)}$ de determinada variável ordenadas de forma crescente. A mediana do conjunto de dados $X$ é o valor que deixa metade das observações abaixo dela e metade dos dados acima.
+
+Com isso, pode-se calcular a mediana da seguinte forma:
+
+$$
+med(X) =
+    \begin{cases}
+         X_{\frac{n+1}{2}}, \textrm{para n ímpar} \\
+         \frac{X_{\frac{n}{2}}+X_{\frac{n}{2} + 1}}{2}, \textrm{para n par} \\
+    \end{cases}
+$$
+
+## Quartis
+
+Os quartis são separatrizes que dividem o conjunto de dados em quatro partes iguais. O primeiro quartil (ou inferior) delimita os 25% menores valores, o segundo representa a mediana, e o terceiro delimita os 25% maiores valores. Inicialmente deve-se calcular a posição do quartil:
+
+-   Posição do primeiro quartil $P_1$: $$P_1=\frac{n+1}{4}$$
+
+-   Posição da mediana (segundo quartil) $P_2$: $$P_2 = \frac{n+1}{2}$$
+
+-   Posição do terceiro quartil $P_3$: $$P_3=\frac{3 \times (n+1)}{4}$$
+
+Com $n$ sendo o tamanho da amostra. Dessa forma, $X_{\left( P_i \right)}$ é o valor do $i$-ésimo quartil, onde $X_{\left( j \right)}$ representa a $j$-ésima observação dos dados ordenados.
+
+Se o cálculo da posição resultar em uma fração, deve-se fazer a média entre o valor que está na posição do inteiro anterior e do seguinte ao da posição.
+
+## Variância
+
+A variância é uma medida que avalia o quanto os dados estão dispersos em relação à média, em uma escala ao quadrado da escala dos dados.
+
+### Variância Amostral
+
+Para uma amostra, a variância é dada por:
+
+$$S^2=\frac{\sum\limits_{i=1}^{n}\left(X_i - \bar{X}\right)^2}{n-1}$$
+
+Com:
+
+-   $X_i =$ i-ésima observação da amostra
+
+-   $\bar{X} =$ média amostral
+
+-   $n =$ tamanho da amostra
+
+## Desvio Padrão
+
+O desvio padrão é a raiz quadrada da variância. Ele avalia o quanto os dados estão dispersos em relação à média.
+
+### Desvio Padrão Amostral
+
+Para uma amostra, o desvio padrão é dado por:
+
+$$S=\sqrt{\frac{\sum\limits_{i=1}^{n}\left(X_i - \bar{X}\right)^2}{n-1}}$$
+
+Com:
+
+-   $X_i =$ i-ésima observação da amostra
+
+-   $\bar{X} =$ média amostral
+
+-   $n =$ tamanho da amostra
+
+## Boxplot
+
+O boxplot é uma representação gráfica na qual se pode perceber de forma mais clara como os dados estão distribuídos. A figura abaixo ilustra um exemplo de boxplot.
+
+![Exemplo de boxplot](images/box_uni.png){fig-align="center"}
+
+A porção inferior do retângulo diz respeito ao primeiro quartil, enquanto a superior indica o terceiro quartil. Já o traço no interior do retângulo representa a mediana do conjunto de dados, ou seja, o valor em que o conjunto de dados é dividido em dois subconjuntos de mesmo tamanho. A média é representada pelo losango branco e os pontos são *outliers*. Os *outliers* são valores discrepantes da série de dados, ou seja, valores que não demonstram a realidade de um conjunto de dados.
+
+## Gráfico de Dispersão
+
+O gráfico de dispersão é uma representação gráfica utilizada para ilustrar o comportamento conjunto de duas variáveis quantitativas. A figura abaixo ilustra um exemplo de gráfico de dispersão, onde cada ponto representa uma observação do banco de dados.
+
+![Exemplo de Gráfico de Dispersão](images/disp_uni.png){fig-align="center"}
+
+## Tipos de Variáveis
+
+### Qualitativas
+
+As variáveis qualitativas são as variáveis não numéricas, que representam categorias ou características da população. Estas subdividem-se em:
+
+-   **Nominais**: quando não existe uma ordem entre as categorias da variável (exemplos: sexo, cor dos olhos, fumante ou não, etc)
+-   **Ordinais**: quando existe uma ordem entre as categorias da variável (exemplos: nível de escolaridade, mês, estágio de doença, etc)
+
+### Quantitativas
+
+As variáveis quantitativas são as variáveis numéricas, que representam características numéricas da população, ou seja, quantidades. Estas subdividem-se em:
+
+-   **Discretas**: quando os possíveis valores são enumeráveis (exemplos: número de filhos, número de cigarros fumados, etc)
+-   **Contínuas**: quando os possíveis valores são resultado de medições (exemplos: massa, altura, tempo, etc)
+
+## Coeficiente de Correlação de Pearson
+
+O coeficiente de correlação de Pearson é uma medida que verifica o grau de relação linear entre duas variáveis quantitativas. Este coeficiente varia entre os valores -1 e 1. O valor zero significa que não há relação linear entre as variáveis. Quando o valor do coeficiente $r$ é negativo, diz-se existir uma relação de grandeza inversamente proporcional entre as variáveis. Analogamente, quando $r$ é positivo, diz-se que as duas variáveis são diretamente proporcionais.
+
+O coeficiente de correlação de Pearson é normalmente representado pela letra $r$ e a sua fórmula de cálculo é:
+
+$$
+r_{Pearson} = \frac{\displaystyle \sum_{i=1}^{n} \left [ \left(x_i-\bar{x}\right) \left(y_i-\bar{y}\right) \right]}{\sqrt{\displaystyle \sum_{i=1}^{n} x_i^2 - n\bar{x}^2}  \times \sqrt{\displaystyle \sum_{i=1}^{n} y_i^2 - n\bar{y}^2}}
+$$
+
+Onde:
+
+-   $x_i =$ i-ésimo valor da variável $X$
+-   $y_i =$ i-ésimo valor da variável $Y$
+-   $\bar{x} =$ média dos valores da variável $X$
+-   $\bar{y} =$ média dos valores da variável $Y$
+
+Vale ressaltar que o coeficiente de Pearson é paramétrico e, portanto, sensível quanto à normalidade (simetria) dos dados.
+
+## Teste de Correlação de Pearson
+
+O coeficiente de correlação linear de Pearson indica a força e a direção do relacionamento linear entre duas variáveis quantitativas. É um índice adimensional com valores situados entre -1 e 1, no qual o valor -1 representa total correlação linear negativa entre as variáveis (quando o valor de uma variável cresce, o valor da outra diminui) e o valor 1 representa total correlação linear positiva entre elas (ambas crescem simultaneamente). Esse coeficiente é obtido por meio da fórmula:
+
+$$r_{Pearson} = \frac{\displaystyle \sum_{i=1}^{n} \left [ \left(x_i-\bar{x}\right) \left(y_i-\bar{y}\right) \right]}{\sqrt{\displaystyle \sum_{i=1}^{n} x_i^2 - n\bar{x}^2} \sqrt{\displaystyle \sum_{i=1}^{n} y_i^2 - n\bar{y}^2}}$$
+
+\noindent em que
+
+-   $x_i=$ i-ésimo valor da variável $X$
+
+-   $y_i=$ i-ésimo valor da variável $Y$
+
+-   $\bar{x}=$ média dos valores da variável $X$
+
+-   $\bar{y}=$ média dos valores da variável $Y$
+
+-   $r_{Pearson}=$ coeficiente de correlação linear de Pearson amostral
+
+Para o teste de correlação de Pearson, tem-se as seguintes hipóteses:
+
+\hipoteses{Não há correlação linear entre as variáveis $X$ e $Y$ $\left(\rho_{Pearson} = 0 \right)$ }{Há correlação linear entre as variáveis $X$ e $Y$ $\left(\rho_{Pearson} \neq 0 \right)$ }
+
+em que $\rho_{Pearson}$ é o parâmetro a ser testado: coeficiente de correlação linear populacional.
+
+Se X e Y tem distribuição normal, tem-se que a estatística do teste é dada por:
+
+$$t_{Pearson} = \frac{r_{Pearson} \sqrt{n-2}}{\sqrt{1-r_{Pearson}^2}} \sim t_{n-2} $$
+
+Assim, sob $H_{0}$, $t_{Pearson}$ segue uma distribuição \textit{t}-Student com ($n - 2$) graus de liberdade.
+
 
 # Análises
 
@@ -75,12 +247,11 @@ ggsave("series_uni.pdf", width = 158, height = 93, units = "mm")
 
 estat_colors <- c(
 "#A11D21", "#003366", "#CC9900",
-"#663333", "#FF6600", "#CC9966",
+"#663333", "#FF6600",
 "#999966", "#006606", "#008091",
 "#041835", "#666666" )
 
 ```
-
 
 
 
@@ -103,16 +274,14 @@ estat_colors <- c(
 1887 & 135.444,8 & 3,40\% \\
 1888 & 133.757,6 & −1,25\% \\
 1889 & 155.009,1 & 15,89\% \\
-\midrule
+\hline
 \textbf{Total} & 1.252.977,8 & 47,07\% \\
 \hline
 \end{tabular}
 \label{tab:receitas}
 \end{table}
 
-
-
-De modo geral, ao analisar a tabela acima e a [@fig-receita], é perceptível uma tendência de crescimento contínuo, com algumas flutuações pontuais que merecem destaque. A série indica que, ao final do período, as receitas atingiram o maior valor da década, refletindo um comportamento fortemente ascendente.
+De modo geral, ao analisar a tabela acima e a $\ref{fig-receita}$, é perceptível uma tendência de crescimento contínuo, com algumas flutuações pontuais que merecem destaque. A série indica que, ao final do período, as receitas atingiram o maior valor da década, refletindo um comportamento fortemente ascendente.
   
 ### 1880 a 1885 
   
@@ -137,7 +306,7 @@ dadosClientes$Peso = dadosClientes$Weight_lbs*0.4535
 
 dadosClientes$Altura = dadosClientes$Height_dm*10
 ```
-### Altura
+### Análises relacionadas à altura
 ```{r fig-altura, fig.cap="Boxplot da altura dos clientes."}
   ggplot(dadosClientes) +
 aes(x=factor(""), y=Altura) +
@@ -203,9 +372,9 @@ print_quadro_resumo(dadosClientes, Altura)
 
 ```
 
-De modo geral, de acordo com o que pode ser percebido na tabela acima e na @fig-altura, a altura dos clientes demonstra-se com uma variação moderada entre os indivíduos, com desvio padrão de 9,9cm, o que indica que a maioria dos clientes possui altura próxima à média, que é 171,48cm. Ainda na @fig-altura, é possível identificar outliers correspondentes aos clientes mais altos e mais baixos, sendo a maior altura registrada de 200 cm e a menor de 150 cm. Além disso, o valor da mediana (171,8cm), está muito próxima da média, sugerindo uma distribuição bastante simétrica.
+Em termos gerais, de acordo com o que pode ser percebido na tabela acima e na $\ref{fig-altura}$, a altura dos clientes demonstra-se com uma variação moderada entre os indivíduos, com desvio padrão de 9,9cm, o que indica que a maioria dos clientes possui altura próxima à média, que é 171,48cm. Ainda na $\ref{fig-altura}$, é possível identificar outliers correspondentes aos clientes mais altos e mais baixos, sendo a maior altura registrada de 200 cm e a menor de 150 cm. Além disso, o valor da mediana (171,8cm), está muito próxima da média, sugerindo uma distribuição bastante simétrica.
 
-### Peso
+### Análises relacionadas ao peso
 
 ```{r fig-peso, fig.cap="Boxplot do peso dos clientes."}
   ggplot(dadosClientes) +
@@ -222,24 +391,24 @@ print_quadro_resumo(dadosClientes, Peso)
 
 ```
 
-Considerando os dados apresentados na tabela acima e na @fig-peso, o peso dos clientes também revela uma variação moderada entre os indivíduos, com desvio padrão de 11,9 kg, o que indica que a maioria apresenta valores próximos à média de 75,17 kg. Ainda na @fig-peso, é possível identificar outliers que representam os clientes com maiores e menores pesos, sendo o menor valor observado de 44,99 kg e o maior de 119,28 kg. Além disso, assim como na altura, a mediana (75,28 kg) encontra-se praticamente igual à média, sugerindo uma distribuição equilibrada e relativamente simétrica dos dados.
+Considerando os dados apresentados na tabela acima e na $\ref{fig-peso}$, o peso dos clientes também revela uma variação moderada entre os indivíduos, com desvio padrão de 11,9 kg, o que indica que a maioria apresenta valores próximos à média de 75,17 kg. Ainda na $\ref{fig-peso}$, é possível identificar outliers que representam os clientes com maiores e menores pesos, sendo o menor valor observado de 44,99 kg e o maior de 119,28 kg. Além disso, assim como na altura, a mediana (75,28 kg) encontra-se praticamente igual à média, sugerindo uma distribuição equilibrada e relativamente simétrica dos dados.
 
 ### Relação entre as variáveis
-```{r fig-rel-peso,fig.cap="Gráfico de dispersão da altura pelo peso."}
+```{r fig-rel-peso,fig.cap="Gráfico de dispersão do peso pela altura."}
 
 ggplot(dadosClientes,aes(x = Altura, y = Peso)) +
-geom_point(colour = "#A11D21", size = 3, alpha = 0.5) + labs( x="Altura do cliente (cm)", y="Peso do cliente (kg)") +  geom_smooth(method = "lm", colour = "#003366", linewidth = 1) +  
+geom_point(colour = "#A11D21", size = 3, alpha = 0.3) + labs( x="Altura (cm)", y="Peso do cliente (kg)") +  geom_smooth(method = "lm", colour = "#003366", linewidth = 1) +  
 theme_estat()
 ggsave("disp_uni.pdf", width = 158, height = 93, units = "mm")
 
 ```
 
 
-A @fig-rel-peso apresenta uma tendência de crescimento clara, que significa, de maneira geral, que à medida que a altura aumenta, o peso tende também a crescer. Dessa maneira, com os pontos moderadamente concentrados em torno de uma linha ascendente, é perceptível uma relação linear positiva entre as duas variáveis apesar de existir leve dispersão. Além disso, o coeficiente de correlação de Pearson, que é uma medida estatística que indica a força e a direção da relação linear entre duas variáveis numéricas variando sua força de relação entre -1 (relação negativa) e 1 (relação positiva), de 0,6971 também reforça uma correlação positiva forte entre as variáveis. 
+A $\ref{fig-rel-peso}$ apresenta uma tendência de crescimento clara, que significa, de maneira geral, que à medida que a altura aumenta, o peso tende também a crescer. Dessa maneira, com os pontos moderadamente concentrados em torno de uma linha ascendente, é perceptível uma relação linear positiva entre as duas variáveis apesar de existir leve dispersão. Além disso, o coeficiente de correlação de Pearson, que é uma medida estatística que indica a força e a direção da relação linear entre duas variáveis numéricas variando sua força de relação entre -1 (relação negativa) e 1 (relação positiva), de 0,697 também reforça uma correlação positiva forte entre as variáveis. 
 
 ## Idade dos clientes de Âmbar Seco a depender da loja.
 
-Nessa análise serão observadas as medidas de resumo das idades (em anos) dos clientes com o intuito de compreender melhor o perfil etário de tais em três cenários diferentes: os dados etários gerais da amostra disponibilizada, que contam com todas cidades e lojas, as análises na cidade de Âmbar Seco sem diferenciação por loja, e a análise que leva em conta as lojas de Âmbar Seco individualmente.Tais dados ajudarão a ter um melhor entendimento de quais são os perfis de idades dos clientes em diversos aspectos.
+Nessa análise serão observadas medidas de resumo das idades (em anos) dos clientes com o intuito de compreender melhor o perfil etário de tais em três cenários diferentes: os dados etários gerais da amostra disponibilizada, que contam com todas cidades e lojas, as análises na cidade de Âmbar Seco sem diferenciação por loja, e a análise que leva em conta as lojas de Âmbar Seco individualmente.Tais dados ajudarão a ter um melhor entendimento de quais são os perfis de idades dos clientes em diversos aspectos.
 
 
 ### Idade de todos clientes da amostra
@@ -275,7 +444,7 @@ theme_estat()
 print_quadro_resumo(dadosFinaiss, Age)
 ```
 
-Levando em conta a tabela acima e a @fig-idade-geral, a distribuição geral das idades dos clientes apresenta uma média de aproximadamente 37,5 anos, indicando que a maioria dos indivíduos se encontra na faixa etária adulta . O desvio padrão de 12,8 anos evidencia uma variação moderada nas idades observadas, sugerindo que há certa diferença no público analisado. A mediana de 36 anos confirma a concentração dos valores em torno da média, enquanto o intervalo entre o primeiro e o terceiro quartil (28 a 44 anos) mostra que metade dos clientes possui idade dentro dessa faixa. Os valores mínimo e máximo, 15 e 80 anos, indicam a presença de indivíduos tanto jovens quanto idosos na amostra, ainda que estes representem casos menos frequentes (outliers). 
+Levando em conta a tabela acima e a $\ref{fig-idade-geral}$, a distribuição geral das idades dos clientes apresenta uma média de aproximadamente 37,5 anos, indicando que a maioria dos indivíduos se encontra na faixa etária adulta . O desvio padrão de 12,8 anos evidencia uma variação moderada nas idades observadas, sugerindo que há certa diferença no público analisado. A mediana de 36 anos confirma a concentração dos valores em torno da média, enquanto o intervalo entre o primeiro e o terceiro quartil (28 a 44 anos) mostra que metade dos clientes possui idade dentro dessa faixa. Os valores mínimo e máximo, 15 e 80 anos, indicam a presença de indivíduos tanto jovens quanto idosos na amostra, ainda que estes representem casos menos frequentes (outliers). 
 
 ### Idade dos clientes de Âmbar Seco
 
@@ -298,7 +467,7 @@ print_quadro_resumo(cidadeAmbar, Age)
 
 ```
 
-Nessa outra análise, levando em conta a tabela de medidas acima e a @fig-idade-ambar, é perceptível que a média de idade é de 35,9 anos, ligeiramente inferior à média geral da amostra (37,5 anos), indicando um público um pouco mais jovem. O desvio padrão de 10,5 anos e a variância de 109,4 mostram uma dispersão menor em comparação à amostra total, o que sugere maior homogeneidade nas idades dos clientes locais. A mediana de 35 anos reforça essa concentração em torno da média.
+Nessa outra análise, levando em conta a tabela de medidas acima e a $\ref{fig-idade-ambar}$, é perceptível que a média de idade é de 35,9 anos, ligeiramente inferior à média geral da amostra (37,5 anos), indicando um público um pouco mais jovem. O desvio padrão de 10,5 anos e a variância de 109,4 mostram uma dispersão menor em comparação à amostra total, o que sugere maior homogeneidade nas idades dos clientes locais. A mediana de 35 anos reforça essa concentração em torno da média.
 
 ### Idade dos clientes de Âmbar seco a partir da loja
 
@@ -378,7 +547,7 @@ print_quadro_resumo_grande(cidadeAmbar, Age, title = "Medidas resumo da idade po
 ```
 
 
-Considerando a tabela de medidas resumo de cada loja, e a @fig-idade-lojas, é notável diferenças no perfil etário das quatro lojas avaliadas em Âmbar Seco. O boxplot indica que as lojas Ferraria Seca e Saloon concentram clientes mais jovens em comparação às outras duas lojas, com uma mediana próxima a 30 anos. Além disso, ambas apresentam uma maior dispersão entre os dados (desvio padrão mais alto de 13,31 e 12,70 respectivamente), o que indica um atendimento de públicos variados.
+Considerando a tabela de medidas resumo de cada loja, e a $\ref{fig-idade-lojas}$ , é notável diferenças no perfil etário das quatro lojas avaliadas em Âmbar Seco. O boxplot indica que as lojas Ferraria Seca e Saloon concentram clientes mais jovens em comparação às outras duas lojas, com uma mediana próxima a 30 anos. Além disso, ambas apresentam uma maior dispersão entre os dados (desvio padrão mais alto de 13,31 e 12,70 respectivamente), o que indica um atendimento de públicos variados.
 
 A loja Banco Careca apresenta um comportamento mais homogêneo, com menor dispersão (desvio-padrão de 5,57) e idades concentradas entre 25 (mínimo) e 44 anos (máximo). Sua mediana (34 anos) e média (34,92) estão bastante próximas, o que indica uma distribuição mais simétrica. Esse padrão demonstra que o público dessa unidade é mais estável em termos de faixa etária.
 
@@ -395,15 +564,15 @@ Nessa análise será observada a relação entre duas variáveis fundamentais pa
 ### As três lojas com maior receita no ano de 1889.
 
 ```{r fig-tres-maiores, fig.cap= "Gráfico de colunas da receita das lojas."}
-dadosGerais <- read_excel("C:/Users/Breno/Downloads/relatorio_old_town_road (2).xlsx")
+relatorio_vendas  <- read_excel("C:/Users/Breno/Downloads/relatorio_old_town_road (2).xlsx")
 
-dadosVenda <- read_excel("C:/Users/Breno/Downloads/relatorio_old_town_road (2).xlsx", sheet="infos_vendas")
+infos_vendas <- read_excel("C:/Users/Breno/Downloads/relatorio_old_town_road (2).xlsx", sheet="infos_vendas")
 
-dadosProdutos <- read_excel("C:/Users/Breno/Downloads/relatorio_old_town_road (2).xlsx", sheet="infos_produtos")
+infos_produtos <- read_excel("C:/Users/Breno/Downloads/relatorio_old_town_road (2).xlsx", sheet="infos_produtos")
 
-dadosIntermediarios <- dadosGerais %>% left_join(dadosVenda, by="SaleID")
+dadosIntermediarios <- relatorio_vendas %>% left_join(infos_vendas, by="SaleID")
 
-dadosFinais <- dadosIntermediarios %>% left_join(dadosProdutos, by="ItemID")
+dadosFinais <- dadosIntermediarios %>% left_join(infos_produtos, by="ItemID")
 
 dadosFinais$Receita <- dadosFinais$UnityPrice * dadosFinais$Quantity * 5.31
 
@@ -422,7 +591,7 @@ classes <- dados_1889 %>%
   count(NameStore, wt = Receita) %>%
   mutate(
     freq = n,
-    relative_freq = round((freq / sum(freq)) * 100, 1),
+    relative_freq = round((freq / sum(freq)) * 100, 2),
     freq = gsub("\\.", ",", relative_freq) %>% paste("%", sep = ""),
     label = str_c(round(n,1), " (", freq, ")") %>% str_squish()
   ) %>%
@@ -442,100 +611,79 @@ ggsave("colunas-uni-freq.pdf", width = 158, height = 93, units = "mm")
 
 ```
 
-A partir do que está descrito na @fig-tres-maiores, é possível concluir que as três lojas com maior receita no ano de 1889 foram: Loja "Ouro Fino" com aproximadamente 7,1% de todo faturamento do ano, Loja "TendTudo" ligeiramente abaixo da anterior com 7% da receita total, e "Ferraria Apache",com 6,5% da receita. A partir disso será feita a análise individual de cada uma dessas lojas para que seja analisado quais produtos foram predominantes nas vendas desse ano.
+A partir do que está descrito na $\ref{fig-tres-maiores}$, é possível concluir que as três lojas com maior receita no ano de 1889 foram: Loja "Ouro Fino" com aproximadamente 7,1% de todo faturamento do ano, Loja "TendTudo" ligeiramente abaixo da anterior com 7% da receita total, e "Ferraria Apache",com 6,5% da receita. A partir disso será feita a análise individual de cada uma dessas lojas para que seja analisado quais produtos foram predominantes nas vendas desse ano.
 
-### Os três mais vendidos na loja ouro fino
+### Os três itens mais vendidos nas três lojas com maior receita em 1889.
 
-```{r fig-ouro-fino, fig.cap= "Gráfico de setores dos produtos mais vendidos."}
-  dadosOuroFino <- dados_1889 %>%
-  filter(NameStore == "Loja Ouro Fino")
+Nessa análise, será possível observar a distribuição dos produtos mais vendidos em cada uma das três lojas com maior faturamento em 1889.
 
-  contagem <- dadosOuroFino %>%
-  group_by(NameProduct) %>%
-  summarise(Freq = sum(Quantity)) %>%
-  mutate(Prop = round(100*(Freq/sum(Freq)), 1)) %>%
-  arrange(desc(NameProduct)) %>%
-  mutate(posicao = cumsum(Prop) - 0.5*Prop)
+```{r fig-bivd, fig.cap= "Gráfico de colunas da loja pela frequência de vendas do produto. "}
+top3 <- classes$NameStore
 
-ggplot(contagem) +
-  aes(x = factor(""), y = Prop , fill = factor(NameProduct)) +
-  geom_bar(width = 1, stat = "identity") + coord_polar(theta = "y") +
-  geom_text(
-    aes(x = 1.8, y = posicao, label = paste0(Prop, "%")),
-    color = "black"
+top3_vendas <- dados_1889 %>%
+  filter(NameStore %in% top3)
+
+
+resumo_itens <- top3_vendas %>%
+  group_by(NameStore, ItemID) %>%
+  summarise(Total_Vendido = sum(Quantity), .groups = "drop")
+
+resumo_itens$Produto <- case_when(
+  resumo_itens$ItemID == 1  ~ "Botas de Couro",
+  resumo_itens$ItemID == 3  ~ "Chapéu de Couro",
+  resumo_itens$ItemID == 4  ~ "Colt.45",
+  resumo_itens$ItemID == 5  ~ "Espingarda",
+  resumo_itens$ItemID == 6  ~ "Machado",
+  resumo_itens$ItemID == 10 ~ "Whisky",
+  TRUE ~ "Outro"
+)
+
+resumo_top3_produtos <- resumo_itens %>%
+  group_by(NameStore) %>%
+  slice_max(Total_Vendido, n = 3) %>%
+  ungroup()
+
+resumo_final <- resumo_top3_produtos %>%
+  group_by(NameStore) %>%
+  mutate(
+    perc = round((Total_Vendido / sum(Total_Vendido)) * 100, 2),
+    perc_label = gsub("\\.", ",", perc),
+    legendas = paste0(Total_Vendido, " (", perc_label, "%)")
+  )  %>%
+  ungroup()
+
+
+ggplot(resumo_final) +
+  aes(
+    x = fct_reorder(NameStore, Total_Vendido, .desc = TRUE),
+    y = Total_Vendido,
+    fill = Produto,
+    label = legendas
   ) +
-  theme_void() +
-  theme(legend.position = "top", plot.title = element_text(hjust = 0.8)) +
-  scale_fill_manual(values = estat_colors, name = 'Produto')
+  geom_col(position = position_dodge2(preserve = "single", padding = 0)) +
+  geom_text(
+    position = position_dodge(width = 0.9),
+    vjust = -0.5, hjust = 0.5,
+    size = 2.1
+  ) +
+  labs(
+    x = "Loja",
+    y = "Frequência",
+    fill = "Produto"
+  )+
+  theme_estat()
+ggsave("colunas-bi-freq.pdf", width = 158, height = 93, units = "mm")
 
-ggsave("setor.pdf", width = 158, height = 93, units = "mm")
 ```
 
-A partir dos valores apresentados na @fig-ouro-fino, pode-se concluir que, na loja "Ouro Fino" em 1889, o produto mais vendido foi: "Botas de Couro" (13,3% da quantidade de vendas), seguido pelo "Whisky" (12,5%), e em terceiro "Chapéu de Couro" com 11,5% do total de vendas.
+A partir dos valores apresentados na $\ref{fig-bivd}$, pode-se concluir que, na loja "Ouro Fino" em 1889, o produto mais vendido foi: "Botas de Couro" , seguido pelo "Whisky", e em terceiro "Chapéu de Couro". Na loja "TendTudo", o mais vendido foi "Espingarda" seguido por: "Whisky" e "Colt. 45" respectivamente. Por último, na "Ferraria Apache", o campeão de vendas foi: " Chapéu de couro" seguido por "Espingarda" e em terceiro seguem dois itens empatados com 41 vendas, "Machado" e "Whisky".
 
-### Os três mais vendidos na loja TendTudo
-
-```{r fig-tendtudo, fig.cap= "Gráfico de setores dos produtos mais vendidos."}
-  dadosOuroFino <- dados_1889 %>%
-  filter(NameStore == "Loja TendTudo")
-
-  contagem <- dadosOuroFino %>%
-  group_by(NameProduct) %>%
-  summarise(Freq = sum(Quantity)) %>%
-  mutate(Prop = round(100*(Freq/sum(Freq)), 1)) %>%
-  arrange(desc(NameProduct)) %>%
-  mutate(posicao = cumsum(Prop) - 0.5*Prop)
-
-ggplot(contagem) +
-  aes(x = factor(""), y = Prop , fill = factor(NameProduct)) +
-  geom_bar(width = 1, stat = "identity") + coord_polar(theta = "y") +
-  geom_text(
-    aes(x = 1.8, y = posicao, label = paste0(Prop, "%")),
-    color = "black"
-  ) +
-  theme_void() +
-  theme(legend.position = "top", plot.title = element_text(hjust = 0.8),) +
-  scale_fill_manual(values = estat_colors, name = 'Produto')
-
-ggsave("setor.pdf", width = 158, height = 93, units = "mm")
-```
-
-Com base nos valores exibidos na @fig-tendtudo, observa-se que, na loja "TendTudo" em 1889, o produto com maior volume de vendas foi a "Espingarda", representando 16,4% do total. Em seguida, aparece o "Whisky" com 15,1% e, em terceiro lugar, o "Colt .45", com 13,3% das vendas totais.
-
-### Os três mais vendidos na loja Ferraria Apache
-
-```{r fig-ferraria, fig.cap= "Gráfico de setores dos produtos mais vendidos."}
-  dadosOuroFino <- dados_1889 %>%
-  filter(NameStore == "Ferraria Apache")
-
-  contagem <- dadosOuroFino %>%
-  group_by(NameProduct) %>%
-  summarise(Freq = sum(Quantity)) %>%
-  mutate(Prop = round(100*(Freq/sum(Freq)), 1)) %>%
-  arrange(desc(NameProduct)) %>%
-  mutate(posicao = cumsum(Prop) - 0.5*Prop)
-
-ggplot(contagem) +
-  aes(x = factor(""), y = Prop , fill = factor(NameProduct)) + labs(title = "Figura 11: Gráfico de setores dos produtos mais vendidos") +
-  geom_bar(width = 1, stat = "identity") + coord_polar(theta = "y") +
-  geom_text(
-    aes(x = 1.8, y = posicao, label = paste0(Prop, "%")),
-    color = "black"
-  ) +
-  theme_void() +
-  theme(legend.position = "top", plot.title = element_text(hjust = 0.8)) +
-  scale_fill_manual(values = estat_colors, name = 'Produto')
-
-
-ggsave("setor.pdf", width = 158, height = 93, units = "mm")
-```
-
-A análise da @fig-ferraria indica que, na "Ferraria Apache", no ano de 1889, o item mais comercializado foi o "Chapéu de Couro", correspondendo a 15,2% das vendas. Logo depois, figura a "Espingardaa" com 12,3%, seguido por dois produtos: "Machado" e "Whisky", que representaram 12% do total vendido.
-
-A partir da análise dos gráficos de setores das três lojas em 1889, observa-se que cada estabelecimento apresenta um padrão de vendas distinto, com produtos líderes diferentes em cada caso. Apesar disso, certos itens, como "Whisky" e "Chapéu de Couro", aparecem em mais de uma loja entre os mais vendidos, indicando uma demanda relativamente alta desses produtos no período. Além disso, a variação percentual entre os produtos mais vendidos mostra que, embora cada loja tenha seu produto mais vendido, a composição do top 3 evidencia a diversidade nas preferências dos clientes e na estratégia de vendas de cada loja.
+Dessa maneira, a partir da análise da $\ref{fig-bivd}$ das três lojas em 1889, observa-se que cada estabelecimento apresenta um padrão de vendas distinto, com produtos líderes diferentes em cada caso. Apesar disso, certos itens, como "Whisky" e "Chapéu de Couro", aparecem em mais de uma loja entre os mais vendidos, indicando uma demanda relativamente alta desses produtos no período. Além disso, a variação percentual entre os produtos mais vendidos mostra que, embora cada loja tenha seu produto mais vendido, a composição do top 3 evidencia a diversidade nas preferências dos clientes e na estratégia de vendas de cada loja.
 
 # Conclusão
 
 Com base nas análises realizadas a partir do banco de dados disponibilizado por João Sábio, proprietário da Old Town Road, foi possível obter uma visão abrangente sobre o desempenho das lojas e o perfil dos clientes da região estudada. Os resultados apresentados permitem identificar tendências relevantes para o planejamento estratégico e a tomada de decisão do cliente no contexto comercial do faroeste.
 
-De maneira geral, os resultados obtidos indicam que o mercado regional analisado apresenta crescimento consistente, consumidores com perfis bem definidos e tendências comerciais diversificadas entre as unidades de negócio. As informações geradas a partir deste estudo fornecem dados concretos para o planejamento e expansão das atividades da Old Town Road, apoiando decisões futuras de investimento, segmentação de público e otimização de portfólio de produtos.
+De maneira geral, considerando todas análises solicitadas, observou-se um crescimento consistente da receita entre 1880 e 1889, totalizando cerca de 47% no período e média anual próxima de 5%, o que evidencia uma tendência de expansão ao longo da década. As análises de correlação apontaram relação linear positiva moderadamente forte, entre as variáveis "altura" e "peso", indicando que o aumento de uma tende a acompanhar o da outra. Verificaram-se também diferenças marcantes no perfil etário das lojas avaliadas: unidades como Ferraria Seca e Saloon concentram públicos mais jovens e heterogêneos, enquanto Banco Careca e Vendinha Rápida atendem clientelas mais homogêneas e de faixas etárias mais elevadas. Por fim, em 1889, as três lojas de maior receita apresentaram padrões de venda distintos, com produtos líderes variados — ainda que itens como Whisky e Chapéu de Couro se destaquem em mais de um estabelecimento —, refletindo diversidade nas preferências dos consumidores e nas estratégias comerciais de cada unidade.
+
+Destarte, os resultados obtidos indicam que o mercado regional analisado apresenta crescimento consistente, consumidores com perfis bem definidos e tendências comerciais diversificadas entre as unidades de negócio. As informações geradas a partir deste estudo fornecem dados concretos para o planejamento e expansão das atividades da Old Town Road, apoiando decisões futuras de investimento, segmentação de público e otimização de portfólio de produtos.
